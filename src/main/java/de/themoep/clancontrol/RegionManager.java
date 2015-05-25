@@ -30,7 +30,7 @@ public class RegionManager {
     private int dimension;
 
     private String world;
-    
+
     private int centerX;
     private int centerZ;
     private int mapradius;
@@ -115,7 +115,7 @@ public class RegionManager {
      * @return The Region this chunk is part of
      */
     private Region getRegion(Chunk chunk) {
-        return (chunk == null) ? null : getRegion(chunk.getWorld().getName(), chunk.getX(), chunk.getZ());
+        return (chunk == null) ? null : getRegion(chunk.getWorld().getName(), chunkToRegionCoord(chunk.getX()), chunkToRegionCoord(chunk.getZ()));
     }
 
     /**
@@ -124,7 +124,11 @@ public class RegionManager {
      * @return The Region this occupied chunk is part of
      */
     public Region getRegion(OccupiedChunk chunk) {
-        return (chunk == null) ? null : getRegion(chunk.getWorld().getName(), chunk.getX(), chunk.getZ());
+        return (chunk == null) ? null : getRegion(chunk.getWorld().getName(), chunkToRegionCoord(chunk.getX()), chunkToRegionCoord(chunk.getZ()));
+    }
+
+    private int chunkToRegionCoord(int chunkCoord) {
+        return ((chunkCoord < 0 ) ? chunkCoord - 16 : chunkCoord) * 16 / dimension;
     }
 
     /**
@@ -132,7 +136,7 @@ public class RegionManager {
      * @param worldname
      * @param regionX
      * @param regionZ
-     * @return The Region described by this worldname and x/z region coordinates; null if it is outside the radius
+     * @return The Region described by this worldname and x/z region coordinates; null if it is outside the board
      */
     public Region getRegion(String worldname, int regionX, int regionZ) {
         if(Math.abs(mapradius + centerX) < Math.abs(regionX*dimension)
