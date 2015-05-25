@@ -172,21 +172,7 @@ public class RegionManager {
     public void recalculateBoard(Region region) {
         String controller = region.calculateControl(chunkRatio);
         if(controller != null) {
-            BorderWalker walker = null;
-            if(region.getStatus() == RegionStatus.BORDER) {
-                walker = new BorderWalker(region);
-            } else {
-                List<Region> borderRegions = region.getSurroundingRegions(RegionStatus.BORDER, controller);
-                if(borderRegions.size() > 0) {
-                    walker = new BorderWalker(borderRegions.get(0));
-                }
-            }
-            if(walker != null) {
-                Map<Region, Region> border = walker.walk();
-                if(border != null) {
-                    
-                }
-            }
+
         }
     }
 }
