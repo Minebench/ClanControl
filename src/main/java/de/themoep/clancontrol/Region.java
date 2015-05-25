@@ -34,6 +34,8 @@ public class Region {
     
     private RegionStatus status;
     
+    private List<Region> surroundingRegions;
+    
     private List<OccupiedChunk> occupiedCunks = new ArrayList<OccupiedChunk>();
     
     private String controller = "";
@@ -113,7 +115,7 @@ public class Region {
     public String calculateControl(double chunkRatio) {
         if (getStatus() == RegionStatus.FREE && getChunks().size() == 1) {
             controller = getChunks().get(0).getClan();
-            if(getSurroundingRegions(RegionStatus.BORDER, getController()).size() == 4) {
+            if(getSurroundingRegions().size() == getSurroundingRegions(RegionStatus.BORDER, getController()).size()) {
                 status = RegionStatus.CENTER;
             } else {
                 status = RegionStatus.BORDER;
@@ -182,11 +184,16 @@ public class Region {
     
     public List<Region> getSurroundingRegions() {
         List<Region> regions = new ArrayList<Region>();
-        for(int[] i : new int[][] {{1,0},{0,-1},{-1,0},{0,1}}) {
-            Region r = getRegionManager().getRegion(worldname, getX() + i[0], getZ() + i[1]);
-            if(r != null) {
-                regions.add(r);
+        if(surroundingRegions != null) {
+            regions = surroundingRegions;
+        } else {
+            for (int[] i : new int[][]{{1, 0}, {0, -1}, {-1, 0}, {0, 1}}) {
+                Region r = getRegionManager().getRegion(worldname, getX() + i[0], getZ() + i[1]);
+                if (r != null) {
+                    regions.add(r);
+                }
             }
+            surroundingRegions = regions;
         }
         return regions;
     }
