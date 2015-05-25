@@ -160,6 +160,9 @@ public class Region {
             }
         } else if(getChunks().size() > 0) {
             status = RegionStatus.CONFLICT;
+            for(Region r : getSurroundingRegions(RegionStatus.CENTER, getController())) {
+                r.calculateStatus();
+            }
         } else {
             status = RegionStatus.FREE;
         }
