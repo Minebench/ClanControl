@@ -114,9 +114,9 @@ public class Region {
      */
     public String calculateControl(double chunkRatio) {
         if (getStatus() == RegionStatus.FREE && getChunks().size() == 1) {
-            controller = getChunks().get(0).getClan();
-            checkSurroungings();
-            return controller;
+            setController(getChunks().get(0).getClan());
+            calculateStatus();
+            return getController();
         } else if(getStatus() != RegionStatus.CENTER) {
             status = RegionStatus.CONFLICT;
             Map<String, Integer> weights = new HashMap<String, Integer>();
@@ -145,19 +145,25 @@ public class Region {
             if(getStatus() == RegionStatus.CONFLICT) {
                 newController = "";
             }
+            calculateStatus();
             return setController(newController);
         }
         return null;
     }
     
-    public void checkSurroungings() {
+    public RegionStatus calculateStatus() {
         if(!getController().isEmpty()) {
             if(getSurroundingRegions().size() == getSurroundingRegions(RegionStatus.BORDER, getController()).size()) {
                 status = RegionStatus.CENTER;
             } else {
                 status = RegionStatus.BORDER;
             }
+        } else if(getChunks().size() > 0) {
+            status = RegionStatus.CONFLICT;
+        } else {
+            status = RegionStatus.FREE;
         }
+        return status;
     }
 
     public List<Region> getSurroundingRegions(RegionStatus status, String clan) {
