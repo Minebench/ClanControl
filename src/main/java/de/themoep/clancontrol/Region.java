@@ -115,11 +115,7 @@ public class Region {
     public String calculateControl(double chunkRatio) {
         if (getStatus() == RegionStatus.FREE && getChunks().size() == 1) {
             controller = getChunks().get(0).getClan();
-            if(getSurroundingRegions().size() == getSurroundingRegions(RegionStatus.BORDER, getController()).size()) {
-                status = RegionStatus.CENTER;
-            } else {
-                status = RegionStatus.BORDER;
-            }
+            checkSurroungings();
             return controller;
         } else if(getStatus() != RegionStatus.CENTER) {
             status = RegionStatus.CONFLICT;
@@ -154,12 +150,14 @@ public class Region {
         return null;
     }
     
-    public boolean checkSurroungings() {
-        if(!getController().isEmpty() && getSurroundingRegions(RegionStatus.BORDER, getController()).size() == 4) {
-            status = RegionStatus.CENTER;
-            return true;
+    public void checkSurroungings() {
+        if(!getController().isEmpty()) {
+            if(getSurroundingRegions().size() == getSurroundingRegions(RegionStatus.BORDER, getController()).size()) {
+                status = RegionStatus.CENTER;
+            } else {
+                status = RegionStatus.BORDER;
+            }
         }
-        return false;
     }
 
     public List<Region> getSurroundingRegions(RegionStatus status, String clan) {
