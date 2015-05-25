@@ -1,0 +1,9 @@
+# The length and width of one region.
+# Changing this while you already have regions will break everything!
+regiondimension: 256
+map:
+  world: world_pvp
+  radius: 2560
+  center:
+    x: 0
+    z: 0
