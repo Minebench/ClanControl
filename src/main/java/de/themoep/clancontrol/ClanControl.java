@@ -4,7 +4,6 @@ import de.themoep.clancontrol.listeners.BlockListener;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Team;
@@ -26,27 +25,21 @@ import org.bukkit.scoreboard.Team;
  */
 
 public class ClanControl extends JavaPlugin {
-
-    private RegionManager regionManager;
     
+    private static ClanControl instance;
+    private RegionManager regionManager;
     boolean simpleClans = false;
     
     public void onEnable() {
+        instance = this;
         saveDefaultConfig();
-        getServer().getPluginManager().registerEvents(new BlockListener(), ClanControl.getInstance());
-        regionManager = new RegionManager(
-                getConfig().getInt("regiondimension", 256),
-                getConfig().getString("map.world", "world"),
-                getConfig().getInt("map.radius", 2560),
-                getConfig().getInt("map.center.x", 0),
-                getConfig().getInt("map.center.z", 0),
-                getConfig().getDouble("chunkratio", 1)
-        );
+        getServer().getPluginManager().registerEvents(new BlockListener(), getInstance());
+        regionManager = new RegionManager(getInstance());
         simpleClans = getServer().getPluginManager().isPluginEnabled("SimpleClans");
     }
 
     public static ClanControl getInstance() {
-        return (ClanControl) Bukkit.getServer().getPluginManager().getPlugin("ClanControl");
+        return instance;
     }
 
     public RegionManager getRegionManager() {

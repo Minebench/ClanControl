@@ -1,9 +1,11 @@
 package de.themoep.clancontrol;
 
+import de.themoep.utils.ConfigAccessor;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Bukkit Plugins - ${project.description}
@@ -22,9 +24,13 @@ import java.util.*;
  */
 public class RegionManager {
     
+    private ClanControl plugin;
+    
     private Map<Integer, Map<Integer, OccupiedChunk>> chunkCoords = new HashMap<Integer, Map<Integer, OccupiedChunk>>();
     
     private Map<Integer, Map<Integer, Region>> regionCoords = new HashMap<Integer, Map<Integer, Region>>();
+    
+    private ConfigAccessor regionYml;
     
     // Side length of one region
     private int dimension;
@@ -37,12 +43,16 @@ public class RegionManager {
     
     private double chunkRatio;
 
-    public RegionManager(int dimension, String world, int mapradius, int centerX, int centerZ, double chunkRatio) {
-        this.dimension = dimension;
-        this.world = world;
-        this.mapradius = mapradius;
-        this.centerX = centerX;
-        this.centerZ = centerZ;
+    public RegionManager(ClanControl plugin) {
+        this.plugin = plugin;
+        regionYml = new ConfigAccessor(plugin, "regions.yml");
+        regionYml.reloadConfig();
+        dimension = plugin.getConfig().getInt("regiondimension", 256);
+        world = plugin.getConfig().getString("map.world", "world");
+        mapradius = plugin.getConfig().getInt("map.radius", 2560);
+        centerX = plugin.getConfig().getInt("map.center.x", 0);
+        centerZ = plugin.getConfig().getInt("map.center.z", 0);
+        double chunkRatio = plugin.getConfig().getDouble("chunkratio", 1);
         this.chunkRatio = (chunkRatio > 1) ? chunkRatio/100 : chunkRatio;
     }
 
@@ -178,5 +188,9 @@ public class RegionManager {
         if(controller != null) {
 
         }
+    }
+
+    public ConfigAccessor getStorage() {
+        return regionYml;
     }
 }

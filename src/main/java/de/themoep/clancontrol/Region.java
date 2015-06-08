@@ -1,7 +1,9 @@
 package de.themoep.clancontrol;
 
+import de.themoep.utils.ConfigAccessor;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,6 +69,20 @@ public class Region {
     public RegionStatus getStatus() {
         return status;
     }
+
+    /**
+     * Sets the status of this region
+     * @param status
+     * @return The new RegionStatus; null if it didn't change
+     */
+    public RegionStatus setStatus(RegionStatus status) {
+        if(getStatus() != status) {
+            this.status = status;
+            save();
+            return status;
+        }
+        return null;
+    }
     
     public List<OccupiedChunk> getChunks() {
         return occupiedCunks;
@@ -88,29 +104,31 @@ public class Region {
     private String setController(String controller) {
         if(!getController().equals(controller)) {
             this.controller = controller;
+            save();
             return controller;
         }
         return null;
     }
-    
+
     /**
      * Add an OccupiedChunk to this region
      * @param chunk
      * @return The resulting status of this region; null if something impossible happened
      */
     public RegionStatus addChunk(OccupiedChunk chunk) {
-        if(status == RegionStatus.CENTER && getController().equals(chunk.getClan())) {
-            return null;
+        if(status != RegionStatus.CENTER || getController().equals(chunk.getClan())) {
+            occupiedCunks.add(chunk);
+            getRegionManager().recalculateBoard(this);
+            save();
+            return status;
         }
-        occupiedCunks.add(chunk);
-        ClanControl.getInstance().getRegionManager().recalculateBoard(this);
-        return status;
+        return null;
     }
 
     /**
      * Calculate the status and the controller of this region
      * @param chunkRatio The ratio of chunks a clan needs to occupy before he can control a region
-     * @return The name of the resulting controller; empty string there is none; null if no change
+     * @return The name of the resulting controller; empty string if there is none; null if no change
      */
     public String calculateControl(double chunkRatio) {
         if (getStatus() == RegionStatus.FREE && getChunks().size() == 1) {
@@ -130,7 +148,7 @@ public class Region {
             String newController = "";
             for(Map.Entry<String, Integer> weight : weights.entrySet()) {
                 if(weight.getValue() / getChunks().size() > chunkRatio){
-                    if(newController == null) {
+                    if(newController.isEmpty()) {
                         newController = weight.getKey();
                         status = RegionStatus.BORDER;
                     } else if(!weights.containsKey(newController) || weights.get(newController) < weight.getValue()){
@@ -145,28 +163,34 @@ public class Region {
             if(getStatus() == RegionStatus.CONFLICT) {
                 newController = "";
             }
+            newController = setController(newController);
             calculateStatus();
-            return setController(newController);
+            return newController;
         }
         return null;
     }
-    
+
+    /**
+     * Calculate the status of the region based on its surrounding regions and its controller
+     * @return The resulting RegionStatus; null if it did not change
+     */
     public RegionStatus calculateStatus() {
+        RegionStatus s;
         if(!getController().isEmpty()) {
             if(getSurroundingRegions().size() == getSurroundingRegions(RegionStatus.BORDER, getController()).size()) {
-                status = RegionStatus.CENTER;
+                s = RegionStatus.CENTER;
             } else {
-                status = RegionStatus.BORDER;
+                s = RegionStatus.BORDER;
             }
         } else if(getChunks().size() > 0) {
-            status = RegionStatus.CONFLICT;
+            s = RegionStatus.CONFLICT;
             for(Region r : getSurroundingRegions(RegionStatus.CENTER, getController())) {
                 r.calculateStatus();
             }
         } else {
-            status = RegionStatus.FREE;
+            s = RegionStatus.FREE;
         }
-        return status;
+        return setStatus(s);
     }
 
     public List<Region> getSurroundingRegions(RegionStatus status, String clan) {
@@ -212,5 +236,14 @@ public class Region {
             hash = h;
         }
         return h;
+    }
+
+    private void save() {
+        String section = getWorld() + "." + getX() + "." + getZ();
+        ConfigAccessor storage = getRegionManager().getStorage();
+        storage.getConfig().set(section + ".controller", getController());
+        storage.getConfig().set(section + ".status", getStatus().toString());
+        storage.getConfig().set(section + ".chunks", getChunks());
+        storage.saveConfig();
     }
 }
