@@ -239,11 +239,17 @@ public class Region {
     }
 
     private void save() {
-        String section = getWorld() + "." + getX() + "." + getZ();
+        String section = worldname + "." + getX() + "." + getZ();
         ConfigAccessor storage = getRegionManager().getStorage();
         storage.getConfig().set(section + ".controller", getController());
         storage.getConfig().set(section + ".status", getStatus().toString());
-        storage.getConfig().set(section + ".chunks", getChunks());
+        for(OccupiedChunk chunk : getChunks()) {
+            String chunkSection = section + ".chunks." + chunk.getX() + "." + chunk.getZ();
+            storage.getConfig().set(chunkSection + ".clan", chunk.getClan());
+            storage.getConfig().set(chunkSection + ".beacon.x", chunk.getBeacon().getX());
+            storage.getConfig().set(chunkSection + ".beacon.y", chunk.getBeacon().getY());
+            storage.getConfig().set(chunkSection + ".beacon.z", chunk.getBeacon().getZ());
+        }
         storage.saveConfig();
     }
 }
