@@ -136,7 +136,7 @@ public class Region {
             calculateStatus();
             return getController();
         } else if(getStatus() != RegionStatus.CENTER) {
-            status = RegionStatus.CONFLICT;
+            RegionStatus potentialStatus = RegionStatus.CONFLICT;
             Map<String, Integer> weights = new HashMap<String, Integer>();
             for(OccupiedChunk chunk : getChunks()) {
                 if(!weights.containsKey(chunk.getClan())) {
@@ -150,17 +150,17 @@ public class Region {
                 if(weight.getValue() / getChunks().size() > chunkRatio){
                     if(newController.isEmpty()) {
                         newController = weight.getKey();
-                        status = RegionStatus.BORDER;
+                        potentialStatus = RegionStatus.BORDER;
                     } else if(!weights.containsKey(newController) || weights.get(newController) < weight.getValue()){
                         newController = weight.getKey();
-                        status = RegionStatus.BORDER;
+                        potentialStatus = RegionStatus.BORDER;
                     } else if(weights.containsKey(newController) && weights.get(newController) == weight.getValue()) {
                         newController = weight.getKey();
-                        status = RegionStatus.CONFLICT;
+                        potentialStatus = RegionStatus.CONFLICT;
                     }
                 }
             }
-            if(getStatus() == RegionStatus.CONFLICT) {
+            if(potentialStatus == RegionStatus.CONFLICT) {
                 newController = "";
             }
             newController = setController(newController);
