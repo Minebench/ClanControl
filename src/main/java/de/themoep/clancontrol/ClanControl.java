@@ -35,7 +35,11 @@ public class ClanControl extends JavaPlugin {
         saveDefaultConfig();
         getServer().getPluginManager().registerEvents(new BlockListener(), getInstance());
         regionManager = new RegionManager(getInstance());
-        simpleClans = getServer().getPluginManager().isPluginEnabled("SimpleClans");
+        getLogger().info("Searching for SimpleClans...");
+        simpleClans = getServer().getPluginManager().getPlugin("SimpleClans") != null;
+        if(simpleClans) {
+            getLogger().info("Found SimpleClans! Using it as group provider.");
+        }
     }
 
     public static ClanControl getInstance() {

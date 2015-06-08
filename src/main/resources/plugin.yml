@@ -3,6 +3,7 @@ main: de.themoep.clancontrol.ClanControl
 version: '${minecraft.plugin.version}'
 description: ${project.description}
 authors: [Phoenix616]
+softdepend: [SimpleClans]
 commands:
    BukkitTemplatePlugin:
       aliases: [btp]
