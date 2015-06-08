@@ -147,7 +147,7 @@ public class Region {
             }
             String newController = "";
             for(Map.Entry<String, Integer> weight : weights.entrySet()) {
-                if(weight.getValue() / getChunks().size() > chunkRatio){
+                if(weight.getValue() / getChunks().size() >= chunkRatio){
                     if(newController.isEmpty()) {
                         newController = weight.getKey();
                         potentialStatus = RegionStatus.BORDER;
