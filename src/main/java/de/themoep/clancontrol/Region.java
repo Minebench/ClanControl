@@ -147,17 +147,15 @@ public class Region {
             }
             String newController = "";
             for(Map.Entry<String, Integer> weight : weights.entrySet()) {
-                if(weight.getValue() / getChunks().size() >= chunkRatio){
-                    if(newController.isEmpty()) {
-                        newController = weight.getKey();
-                        potentialStatus = RegionStatus.BORDER;
-                    } else if(!weights.containsKey(newController) || weights.get(newController) < weight.getValue()){
-                        newController = weight.getKey();
-                        potentialStatus = RegionStatus.BORDER;
-                    } else if(weights.containsKey(newController) && weights.get(newController) == weight.getValue()) {
-                        newController = weight.getKey();
-                        potentialStatus = RegionStatus.CONFLICT;
-                    }
+                if(newController.isEmpty()) {
+                    newController = weight.getKey();
+                    potentialStatus = RegionStatus.BORDER;
+                } else if(!weights.containsKey(newController) || weights.get(newController) * chunkRatio < weight.getValue()){
+                    newController = weight.getKey();
+                    potentialStatus = RegionStatus.BORDER;
+                } else if(weights.containsKey(newController) && weights.get(newController) * chunkRatio >= weight.getValue()) {
+                    newController = weight.getKey();
+                    potentialStatus = RegionStatus.CONFLICT;
                 }
             }
             if(potentialStatus == RegionStatus.CONFLICT) {
