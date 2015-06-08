@@ -184,8 +184,10 @@ public class Region {
             }
         } else if(getChunks().size() > 0) {
             s = RegionStatus.CONFLICT;
-            for(Region r : getSurroundingRegions(RegionStatus.CENTER, getController())) {
-                r.calculateStatus();
+            if(getStatus() == RegionStatus.BORDER) {
+                for (Region r : getSurroundingRegions(RegionStatus.CENTER)) {
+                    r.calculateStatus();
+                }
             }
         } else {
             s = RegionStatus.FREE;
