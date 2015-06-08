@@ -37,6 +37,9 @@ public class OccupiedChunk {
         this.x = x;
         this.z = z;
         this.clan = clan;
+        this.beaconX = beaconX;
+        this.beaconY = beaconY;
+        this.beaconZ = beaconZ;
     }
 
     /**
