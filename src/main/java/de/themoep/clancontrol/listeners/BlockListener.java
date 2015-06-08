@@ -4,6 +4,7 @@ import de.themoep.clancontrol.ClanControl;
 import de.themoep.clancontrol.OccupiedChunk;
 import de.themoep.clancontrol.Region;
 import de.themoep.clancontrol.RegionStatus;
+import org.bukkit.ChatColor;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -45,11 +46,13 @@ public class BlockListener implements Listener {
             String clan = plugin.getClan(event.getPlayer());
             if((chunk != null && !chunk.getClan().equals(clan)) || (region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan))) {
                 event.setCancelled(true);
-                return;
             } else if(clan != null && (event.getBlock().getType() == Material.BEACON || beaconBaseMaterial.contains(event.getBlock().getType()))) {
                 List<Block> beacons = getCompletedBeacons(event.getBlock());
                 for (Block b : beacons) {
-                    plugin.getRegionManager().registerBeacon(clan, b.getLocation());
+                    boolean success = plugin.getRegionManager().registerBeacon(clan, b.getLocation());
+                    if(success) {
+                        event.getPlayer().sendMessage(ChatColor.YELLOW + "You registered this chunk for " + clan);
+                    }
                 }
             }
         }
@@ -66,11 +69,11 @@ public class BlockListener implements Listener {
             if(block.getType() == Material.BEACON) {
                 int x = block.getX() - 1;
                 int y = block.getY() - 1;
-                int z = block.getY() - 1;
+                int z = block.getZ() - 1;
                 for(int i = 0; i < 3; i++) {
                     for(int j = 0; j < 3; j++) {
                         if(!beaconBaseMaterial.contains(block.getWorld().getBlockAt(x + i, y, z + j).getType())) {
-                            return null;
+                            return beacons;
                         }
                     }
                 }
@@ -79,7 +82,7 @@ public class BlockListener implements Listener {
                 List<Block> foundBeacons = new ArrayList<Block>();
                 int x = block.getX() - 1;
                 int y = block.getY() + 1;
-                int z = block.getY() - 1;
+                int z = block.getZ() - 1;
                 for(int i = 0; i < 3; i++) {
                     for(int j = 0; j < 3; j++) {
                         Block check = block.getWorld().getBlockAt(x + i, y, z + j);
