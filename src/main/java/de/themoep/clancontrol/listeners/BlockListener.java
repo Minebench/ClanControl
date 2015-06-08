@@ -41,17 +41,19 @@ public class BlockListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent event) {
         if(!event.isCancelled()) {
             ClanControl plugin = ClanControl.getInstance();
-            OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getBlock().getLocation());
-            Region region = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
-            String clan = plugin.getClan(event.getPlayer());
-            if((chunk != null && !chunk.getClan().equals(clan)) || (region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan))) {
-                event.setCancelled(true);
-            } else if(clan != null && (event.getBlock().getType() == Material.BEACON || beaconBaseMaterial.contains(event.getBlock().getType()))) {
-                List<Block> beacons = getCompletedBeacons(event.getBlock());
-                for (Block b : beacons) {
-                    boolean success = plugin.getRegionManager().registerBeacon(clan, b.getLocation());
-                    if(success) {
-                        event.getPlayer().sendMessage(ChatColor.YELLOW + "You registered this chunk for " + clan);
+            if(event.getBlock().getWorld().equals(plugin.getRegionManager().getWorld())) {
+                OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getBlock().getLocation());
+                Region region = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
+                String clan = plugin.getClan(event.getPlayer());
+                if ((chunk != null && !chunk.getClan().equals(clan)) || (region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan))) {
+                    event.setCancelled(true);
+                } else if (clan != null && (event.getBlock().getType() == Material.BEACON || beaconBaseMaterial.contains(event.getBlock().getType()))) {
+                    List<Block> beacons = getCompletedBeacons(event.getBlock());
+                    for (Block b : beacons) {
+                        boolean success = plugin.getRegionManager().registerBeacon(clan, b.getLocation());
+                        if (success) {
+                            event.getPlayer().sendMessage(ChatColor.YELLOW + "You registered this chunk for " + clan);
+                        }
                     }
                 }
             }
@@ -106,12 +108,14 @@ public class BlockListener implements Listener {
     public void onBlockDamage(BlockDamageEvent event) {
         if(!event.isCancelled()) {
             ClanControl plugin = ClanControl.getInstance();
-            OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getBlock().getLocation());
-            Region region = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
-            String clan = plugin.getClan(event.getPlayer());
-            if ((chunk != null && !chunk.getClan().equals(clan)) || (region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan))) {
-                event.setCancelled(true);
-                return;
+            if(event.getBlock().getWorld().equals(plugin.getRegionManager().getWorld())) {
+                OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getBlock().getLocation());
+                Region region = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
+                String clan = plugin.getClan(event.getPlayer());
+                if ((chunk != null && !chunk.getClan().equals(clan)) || (region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan))) {
+                    event.setCancelled(true);
+                    return;
+                }
             }
         }
     }
@@ -120,12 +124,14 @@ public class BlockListener implements Listener {
     public void onBlockDestroy(BlockBreakEvent event) {
         if(!event.isCancelled()) {
             ClanControl plugin = ClanControl.getInstance();
-            OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getBlock().getLocation());
-            Region region = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
-            String clan = plugin.getClan(event.getPlayer());
-            if ((chunk != null && !chunk.getClan().equals(clan)) || (region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan))) {
-                event.setCancelled(true);
-                return;
+            if(event.getBlock().getWorld().equals(plugin.getRegionManager().getWorld())) {
+                OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getBlock().getLocation());
+                Region region = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
+                String clan = plugin.getClan(event.getPlayer());
+                if ((chunk != null && !chunk.getClan().equals(clan)) || (region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan))) {
+                    event.setCancelled(true);
+                    return;
+                }
             }
         }
     }

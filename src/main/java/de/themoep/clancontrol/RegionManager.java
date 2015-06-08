@@ -1,8 +1,10 @@
 package de.themoep.clancontrol;
 
 import de.themoep.utils.ConfigAccessor;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.World;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -68,11 +70,14 @@ public class RegionManager {
             } else if(chunkCoords.get(chunk.getX()).containsKey(chunk.getZ())){
                 return false;
             }
-            RegionStatus result = getRegion(chunk).addChunk(chunk);
-            if(result != null) {
-                chunkCoords.get(chunk.getX()).put(chunk.getZ(), chunk);
-                return true;
-            }            
+            Region region = getRegion(chunk);
+            if(region != null) {
+                RegionStatus result = region.addChunk(chunk);
+                if (result != null) {
+                    chunkCoords.get(chunk.getX()).put(chunk.getZ(), chunk);
+                    return true;
+                }
+            }
         }
         return false;
     }
@@ -137,10 +142,6 @@ public class RegionManager {
         return (chunk == null) ? null : getRegion(chunk.getWorld().getName(), chunkToRegionCoord(chunk.getX()), chunkToRegionCoord(chunk.getZ()));
     }
 
-    private int chunkToRegionCoord(int chunkCoord) {
-        return ((chunkCoord < 0 ) ? chunkCoord - 16 : chunkCoord) * 16 / dimension;
-    }
-
     /**
      * Get the Region from a worldname and x/z region coordinates
      * @param worldname
@@ -192,5 +193,13 @@ public class RegionManager {
 
     public ConfigAccessor getStorage() {
         return regionYml;
+    }
+
+    private int chunkToRegionCoord(int chunkCoord) {
+        return ((chunkCoord < 0 ) ? chunkCoord - 16 : chunkCoord) * 16 / dimension;
+    }
+    
+    public World getWorld() {
+        return Bukkit.getWorld(world);
     }
 }
