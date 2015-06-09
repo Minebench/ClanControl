@@ -146,12 +146,12 @@ public class RegionManager {
                 }
             }
         }
-        plugin.getLogger().info("Sucessfully loaded " + regionCount + " regions with " + chunkCount + " occupied chunks!");
+        plugin.getLogger().info("Successfully loaded " + regionCount + " regions with " + chunkCount + " occupied chunks!");
         if(regionFailedCount > 0) {
-            plugin.getLogger().warning("Failed to laod " + regionFailedCount + " regions!");
+            plugin.getLogger().warning("Failed to load " + regionFailedCount + " regions!");
         }
         if(chunkFailedCount > 0) {
-            plugin.getLogger().warning("Failed to laod " + chunkFailedCount + " chunks!");
+            plugin.getLogger().warning("Failed to load " + chunkFailedCount + " chunks!");
         }
     }
 
