@@ -2,6 +2,7 @@ package de.themoep.clancontrol;
 
 import de.themoep.utils.ConfigAccessor;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -116,11 +117,11 @@ public class Region {
      * @return The resulting status of this region; null if something impossible happened
      */
     public RegionStatus addChunk(OccupiedChunk chunk) {
-        if(status != RegionStatus.CENTER || getController().equals(chunk.getClan())) {
+        if(getStatus() != RegionStatus.CENTER || getController().equals(chunk.getClan())) {
             occupiedCunks.add(chunk);
             getRegionManager().recalculateBoard(this);
             save();
-            return status;
+            return getStatus();
         }
         return null;
     }
@@ -182,15 +183,22 @@ public class Region {
             }
         } else if(getChunks().size() > 0) {
             s = RegionStatus.CONFLICT;
-            if(getStatus() == RegionStatus.BORDER) {
-                for (Region r : getSurroundingRegions(RegionStatus.CENTER)) {
-                    r.calculateStatus();
-                }
-            }
         } else {
             s = RegionStatus.FREE;
         }
-        return setStatus(s);
+        RegionStatus resulting = setStatus(s);
+        if(resulting != null) {
+            if(getStatus() == RegionStatus.BORDER || getStatus() == RegionStatus.CENTER) {
+                for (Region r : getSurroundingRegions(RegionStatus.BORDER, getController())) {
+                    r.calculateStatus();
+                }
+            } else if(getStatus() == RegionStatus.CONFLICT || getStatus() == RegionStatus.FREE) {
+                for(Region r : getSurroundingRegions(RegionStatus.CENTER)) {
+                    r.calculateStatus();
+                }
+            }
+        }
+        return resulting;
     }
 
     public List<Region> getSurroundingRegions(RegionStatus status, String clan) {
