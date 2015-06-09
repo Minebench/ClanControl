@@ -39,20 +39,26 @@ public class Region {
     
     private List<Region> surroundingRegions;
     
-    private List<OccupiedChunk> occupiedCunks = new ArrayList<OccupiedChunk>();
+    private List<OccupiedChunk> occupiedCunks;
     
-    private String controller = "";
+    private String controller;
 
     public Region(RegionManager rm, String worldname, int x, int z) {
         this(rm, worldname, x, z, RegionStatus.FREE);
     }
 
     public Region(RegionManager rm, String worldname, int x, int z, RegionStatus status) {
+        this(rm, worldname, x, z, status, "", new ArrayList<OccupiedChunk>());
+    }
+
+    public Region(RegionManager rm, String worldname, int x, int z, RegionStatus status, String controller, List<OccupiedChunk> occupiedCunks) {
         this.rm = rm;
         this.worldname = worldname;
         this.x = x;
         this.z = z;
         this.status = status;
+        this.controller = controller;
+        this.occupiedCunks = occupiedCunks;
     }
 
     public RegionManager getRegionManager() {

@@ -5,8 +5,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,7 +34,7 @@ public class RegionManager {
     
     private Map<Integer, Map<Integer, OccupiedChunk>> chunkCoords = new HashMap<Integer, Map<Integer, OccupiedChunk>>();
     
-    private Map<Integer, Map<Integer, Region>> regionCoords = new HashMap<Integer, Map<Integer, Region>>();
+    private Map<Integer, Map<Integer, Region>> regionCoords;
     
     private ConfigAccessor regionYml;
     
@@ -47,15 +51,108 @@ public class RegionManager {
 
     public RegionManager(ClanControl plugin) {
         this.plugin = plugin;
-        regionYml = new ConfigAccessor(plugin, "regions.yml");
-        regionYml.reloadConfig();
+        loadConfig();
+        loadRegions();
+    }
+    
+    private void loadConfig() {
         dimension = plugin.getConfig().getInt("regiondimension", 256);
         world = plugin.getConfig().getString("map.world", "world");
         mapradius = plugin.getConfig().getInt("map.radius", 2560);
         centerX = plugin.getConfig().getInt("map.center.x", 0);
         centerZ = plugin.getConfig().getInt("map.center.z", 0);
         double chunkRatio = plugin.getConfig().getDouble("chunkratio", 1);
-        this.chunkRatio = (chunkRatio > 1) ? chunkRatio/100 : chunkRatio;
+        this.chunkRatio = (chunkRatio > 1) ? chunkRatio / 100 : chunkRatio;
+    }
+    
+    private void loadRegions() {
+        regionYml = new ConfigAccessor(plugin, "regions.yml");
+        getStorage().reloadConfig();
+        
+        regionCoords = new HashMap<Integer, Map<Integer, Region>>();
+        
+        int regionCount = 0;
+        int chunkCount = 0;
+        int regionFailedCount = 0;
+        int chunkFailedCount = 0;
+        
+        plugin.getLogger().info("Start loading regions from storage!");
+        
+        FileConfiguration config = getStorage().getConfig();        
+        for(String worldname : config.getKeys(false)) {
+            
+            ConfigurationSection worldsSect = config.getConfigurationSection(worldname);
+            for(String xStr : worldsSect.getKeys(false)) {
+                try {
+                    int regionX = Integer.parseInt(xStr);
+                    for(String zStr : worldsSect.getConfigurationSection(xStr).getKeys(false)) {
+                        try {
+                            int regionZ = Integer.parseInt(zStr);
+                            List<OccupiedChunk> occupiedChunks = new ArrayList<OccupiedChunk>();
+                            ConfigurationSection chunksSect = worldsSect.getConfigurationSection(xStr + "." + zStr + ".chunks");
+                            for(String chunkXStr : chunksSect.getKeys(false)) {
+                                try {
+                                    int chunkX = Integer.parseInt(chunkXStr);
+                                    for(String chunkZStr : chunksSect.getConfigurationSection(chunkXStr).getKeys(false)) {
+                                        try {
+                                            int chunkZ = Integer.parseInt(chunkZStr);
+                                            
+                                            ConfigurationSection chunkSect = chunksSect.getConfigurationSection(chunkX + "." + chunkZ);
+                                            
+                                            OccupiedChunk chunk = new OccupiedChunk(
+                                                    worldname, 
+                                                    chunkX, 
+                                                    chunkZ, 
+                                                    chunkSect.getString("clan"),
+                                                    chunkSect.getInt("beacon.x"),
+                                                    chunkSect.getInt("beacon.y"),
+                                                    chunkSect.getInt("beacon.z")
+                                            );
+                                            occupiedChunks.add(chunk);
+                                            chunkCount++;
+                                        } catch(NumberFormatException e) {
+                                            plugin.getLogger().severe("Error while loading chunks of region " + regionX + "-" + regionZ + " from the regions.yml! '" + chunkZStr + "' is not a valid integer!");
+                                            chunkFailedCount++;
+                                        }
+                                    }                                    
+                                } catch(NumberFormatException e) {
+                                    plugin.getLogger().severe("Error while loading chunks of region " + regionX + "-" + regionZ + " from the regions.yml! '" + chunkXStr + "' is not a valid integer!");
+                                    chunkFailedCount++;
+                                }
+                            }
+                            String statusStr = worldsSect.getString(xStr + "." + zStr + ".status", "FREE");
+                            try {
+                                RegionStatus status = RegionStatus.valueOf(statusStr);
+                                String controller = worldsSect.getString(xStr + "." + zStr + ".controller", "");
+                                Region region = newRegion(worldname, regionX, regionZ, status, controller, occupiedChunks);
+                                if(region != null) {
+                                    regionCount++;
+                                } else {
+                                    plugin.getLogger().severe("Failed to load region " + regionX + "-" + regionZ + "! It already exists in the RegionManager? Please contact the dev asap as this should not be able to happen!");
+                                    regionFailedCount++;
+                                }
+                            } catch (IllegalArgumentException e) {
+                                plugin.getLogger().severe("Failed to load region " + regionX + "-" + regionZ + "! '" + statusStr + "' is not a valid RegionStatus!");
+                                regionFailedCount++;
+                            }
+                        } catch(NumberFormatException e) {
+                            plugin.getLogger().severe("Error while loading the regions.yml! '" + zStr + "' is not a valid integer!");
+                            regionFailedCount++;
+                        }
+                    }
+                } catch(NumberFormatException e) {
+                    plugin.getLogger().severe("Error while loading the regions.yml! '" + xStr + "' is not a valid integer!");
+                    regionFailedCount++;
+                }
+            }
+        }
+        plugin.getLogger().info("Sucessfully loaded " + regionCount + " regions with " + chunkCount + " occupied chunks!");
+        if(regionFailedCount > 0) {
+            plugin.getLogger().warning("Failed to laod " + regionFailedCount + " regions!");
+        }
+        if(chunkFailedCount > 0) {
+            plugin.getLogger().warning("Failed to laod " + chunkFailedCount + " chunks!");
+        }
     }
 
     public boolean registerBeacon(String clan, Location location) {
@@ -170,12 +267,30 @@ public class RegionManager {
      * @return The newly created and registered region; null if there is already a region with these coords!
      */
     private Region newRegion(String worldname, int regionX, int regionZ) {
-        Region region = new Region(this, worldname, regionX, regionZ);
         if(!regionCoords.containsKey(regionX)) {
             regionCoords.put(regionX, new HashMap<Integer, Region>());
         } else if(regionCoords.get(regionX).containsKey(regionZ)){
             return null;
         }
+        Region region = new Region(this, worldname, regionX, regionZ);
+        regionCoords.get(regionX).put(regionZ, region);
+        return region;
+    }
+    
+    /**
+     * Convenience method for generating and registering new regions
+     * @param worldname
+     * @param regionX
+     * @param regionZ
+     * @return The newly created and registered region; null if there is already a region with these coords!
+     */
+    private Region newRegion(String worldname, int regionX, int regionZ, RegionStatus status, String controller, List<OccupiedChunk> occupiedChunks) {
+        if(!regionCoords.containsKey(regionX)) {
+            regionCoords.put(regionX, new HashMap<Integer, Region>());
+        } else if(regionCoords.get(regionX).containsKey(regionZ)){
+            return null;
+        }
+        Region region = new Region(this, worldname, regionX, regionZ, status, controller, occupiedChunks);
         regionCoords.get(regionX).put(regionZ, region);
         return region;
     }
