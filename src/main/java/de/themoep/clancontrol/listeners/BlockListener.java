@@ -102,7 +102,7 @@ public class BlockListener implements Listener {
         }
         return beacons;
     }
-    
+
     @EventHandler
     public void onBlockDamage(BlockDamageEvent event) {
         if(!event.isCancelled()) {
@@ -142,7 +142,7 @@ public class BlockListener implements Listener {
                         } else if(beaconBaseMaterial.contains(event.getBlock().getType())) {
                             List<Block> beacons = getCompletedBeacons(event.getBlock());
                             for(Block b : beacons) {
-                                if(b.equals(event.getBlock())) {
+                                if(b.equals(chunk.getBeacon())) {
                                     unregistered = plugin.getRegionManager().unregisterChunk(chunk);
                                     break;
                                 }
