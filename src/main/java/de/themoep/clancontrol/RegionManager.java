@@ -439,7 +439,7 @@ public class RegionManager {
                     OccupiedChunk chunk = getChunk(worldname, x, z);
                     if (chunk != null) {
                         row.color(ChatColor.GREEN);
-                        hoverText += ChatColor.RESET + "\n" + plugin.getClanDisplay(chunk.getClan());
+                        hoverText += ChatColor.RESET + "\nOwned by: " + plugin.getClanDisplay(chunk.getClan());
                     } else {
                         row.color(ChatColor.DARK_GRAY);
                     }
