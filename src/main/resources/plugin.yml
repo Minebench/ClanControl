@@ -5,13 +5,22 @@ description: ${project.description}
 authors: [Phoenix616]
 softdepend: [SimpleClans]
 commands:
-   BukkitTemplatePlugin:
-      aliases: [btp]
+   clancontrol:
+      aliases: [control]
       description: Command description.
-      usage: /<command>
-      permission: BukkitTemplatePlugin.smth
+      usage: /<command> [map|region|reload]
+      permission: clancontrol.command
       permission-message: You don't have the permission <permission>
 permissions:
-   BukkitTemplatePlugin.smth:
-      description: Gives permission to the some command
+   clancontrol.command:
+      description: Gives permission to use the command
+      default: true      
+   clancontrol.command.map:
+      description: Gives permission to use the map
+      default: true
+   clancontrol.command.region:
+      description: Gives permission to use the region map
+      default: true
+   clancontrol.command.reload:
+      description: Gives permission to use the reload
       default: op

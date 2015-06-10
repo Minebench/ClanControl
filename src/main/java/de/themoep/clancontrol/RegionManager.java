@@ -1,6 +1,12 @@
 package de.themoep.clancontrol;
 
 import de.themoep.utils.ConfigAccessor;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -32,13 +38,13 @@ public class RegionManager {
     
     private ClanControl plugin;
     
-    private Map<Integer, Map<Integer, OccupiedChunk>> chunkCoords = new HashMap<Integer, Map<Integer, OccupiedChunk>>();
+    private Map<Integer, Map<Integer, OccupiedChunk>> chunkCoords;
     
     private Map<Integer, Map<Integer, Region>> regionCoords;
     
     private ConfigAccessor regionYml;
     
-    // Side length of one region
+    // Side length of one region in chunks
     private int dimension;
 
     private String world;
@@ -56,7 +62,7 @@ public class RegionManager {
     }
     
     private void loadConfig() {
-        dimension = plugin.getConfig().getInt("regiondimension", 256);
+        dimension = plugin.getConfig().getInt("regiondimension", 16);
         world = plugin.getConfig().getString("map.world", "world");
         mapradius = plugin.getConfig().getInt("map.radius", 2560);
         centerX = plugin.getConfig().getInt("map.center.x", 0);
@@ -70,6 +76,7 @@ public class RegionManager {
         getStorage().reloadConfig();
         
         regionCoords = new HashMap<Integer, Map<Integer, Region>>();
+        chunkCoords = new HashMap<Integer, Map<Integer, OccupiedChunk>>();
         
         int regionCount = 0;
         int chunkCount = 0;
@@ -109,6 +116,10 @@ public class RegionManager {
                                                     chunkSect.getInt("beacon.z")
                                             );
                                             occupiedChunks.add(chunk);
+                                            if(!chunkCoords.containsKey(chunkX)) {
+                                                chunkCoords.put(chunkX, new HashMap<Integer, OccupiedChunk>());
+                                            }
+                                            chunkCoords.get(chunkX).put(chunkZ, chunk);
                                             chunkCount++;
                                         } catch(NumberFormatException e) {
                                             plugin.getLogger().severe("Error while loading chunks of region " + regionX + "-" + regionZ + " from the regions.yml! '" + chunkZStr + "' is not a valid integer!");
@@ -265,8 +276,8 @@ public class RegionManager {
      * @return The Region described by this worldname and x/z region coordinates; null if it is outside the board
      */
     public Region getRegion(String worldname, int regionX, int regionZ) {
-        if(Math.abs(mapradius + centerX) < Math.abs(regionX*dimension)
-                || Math.abs(mapradius + centerZ) < Math.abs(regionZ*dimension)) {
+        if(Math.abs(mapradius + centerX) < Math.abs(regionX * dimension * 16)
+                || Math.abs(mapradius + centerZ) < Math.abs(regionZ * dimension * 16)) {
             return null;
         }
         if(worldname.equalsIgnoreCase(world) && regionCoords.containsKey(regionX)) {
@@ -329,10 +340,126 @@ public class RegionManager {
     }
 
     private int chunkToRegionCoord(int chunkCoord) {
-        return ((chunkCoord < 0 ) ? chunkCoord - 16 : chunkCoord) * 16 / dimension;
+        return ((chunkCoord < 0 ) ? chunkCoord - 1 : chunkCoord) / dimension;
     }
     
     public World getWorld() {
         return Bukkit.getWorld(world);
+    }
+
+    /**
+     * Get a map of all the regions 
+     * @param location The location of the player
+     * @return A list of BaseComponent arrays with each line as an entry; empty list if there is no map in this world
+     */
+    public List<BaseComponent[]> getRegionMap(Location location) {
+        List<BaseComponent[]> msg = new ArrayList<BaseComponent[]>();
+        String worldname = world;
+        Region currentRegion = null;
+        if(location != null) {
+            worldname = location.getWorld().getName();
+            currentRegion = getRegion(location);
+        }
+        if(worldname.equals(world)) {
+            int xMin = (centerX - mapradius) / (dimension * 16);
+            int xMax = (centerX + mapradius) / (dimension * 16);
+            int zMin = (centerZ - mapradius) / (dimension * 16);
+            int zMax = (centerZ + mapradius) / (dimension * 16);
+            for (int z = zMin; z <= zMax; z++) {
+                ComponentBuilder row = new ComponentBuilder("");
+                for (int x = xMin; x <= xMax; x++) {
+                    Region region = getRegion(worldname, x, z);
+                    if (region != null) {
+                        ComponentBuilder hoverText = new ComponentBuilder("Status: " + StringUtils.capitalize(region.getStatus().toString().toLowerCase()));
+                        if (!region.getController().isEmpty()) {
+                            hoverText.append(", Controller: " + region.getController());
+                        }
+                        hoverText.append("\n" + ChatColor.GRAY + "Click for more Info!");
+                        if (region.equals(currentRegion)) {
+                            row.append("x");
+                            hoverText.append("\n" + ChatColor.YELLOW + "You are here!");
+                        } else {
+                            row.append("o");
+                        }
+                        if (region.getStatus() == RegionStatus.CONFLICT) {
+                            row.color(ChatColor.LIGHT_PURPLE);
+                        } else if (region.getStatus() == RegionStatus.BORDER) {
+                            row.color(ChatColor.GREEN);
+                        } else if (region.getStatus() == RegionStatus.CENTER) {
+                            row.color(ChatColor.DARK_GREEN);
+                        } else {
+                            row.color(ChatColor.DARK_GRAY);
+                        }
+                        HoverEvent chunkHover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText.create());
+                        ClickEvent chunkClick = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/control region " + region.getX() + " " + region.getZ());
+                        row.event(chunkHover);
+                        row.event(chunkClick);
+                    } else {
+                        row.append("-");
+                        row.color(ChatColor.DARK_GRAY);
+                    }
+                    if (x < xMax) {
+                        row.append(" ");
+                        row.reset();
+                    }
+
+                }
+                msg.add(row.create());
+            }
+        }
+        return msg;
+    }
+
+    /**
+     * Get a map of all the chunks in a region
+     * @param location The location of the player
+     * @return A list of BaseComponent arrays with each line as an entry; empty list if there is no map in this world
+     */
+    public List<BaseComponent[]> getChunkMap(Region region, Location location) {
+        List<BaseComponent[]> msg = new ArrayList<BaseComponent[]>();
+        int xMin = region.getX() * dimension;
+        int xMax = xMin + dimension;
+        int zMin = region.getZ() * dimension;
+        int zMax = zMin + dimension;
+        String worldname = world;
+        OccupiedChunk currentChunk = null;
+        if(location != null) {
+            worldname = location.getWorld().getName();
+            currentChunk = getChunk(location);
+        }
+        if(worldname.equals(world)) {
+            for (int z = zMin; z < zMax; z++) {
+                ComponentBuilder row = new ComponentBuilder("");
+                for (int x = xMin; x < xMax; x++) {
+                    String hoverText = "";
+                    if (currentChunk != null && currentChunk.getX() == x && currentChunk.getZ() == z) {
+                        row.append("x");
+                        hoverText += ChatColor.YELLOW + "You are here!";
+                    } else {
+                        row.append("o");
+                    }
+                    OccupiedChunk chunk = getChunk(worldname, x, z);
+                    if (chunk != null) {
+                        row.color(ChatColor.DARK_GREEN);
+                        if (!hoverText.isEmpty()) {
+                            hoverText += "\n" + ChatColor.RESET;
+                        }
+                        hoverText += chunk.getClan();
+                    } else {
+                        row.color(ChatColor.DARK_GRAY);
+                    }
+                    if (!hoverText.isEmpty()) {
+                        HoverEvent clanHover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverText).create());
+                        row.event(clanHover);
+                    }
+                    if (x < xMax) {
+                        row.append(" ");
+                        row.reset();
+                    }
+                }
+                msg.add(row.create());
+            }
+        }
+        return msg;
     }
 }

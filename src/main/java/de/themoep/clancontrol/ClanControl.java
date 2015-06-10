@@ -1,12 +1,21 @@
 package de.themoep.clancontrol;
 
 import de.themoep.clancontrol.listeners.BlockListener;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Team;
+
+import java.util.List;
 
 /**
  * ClanControl
@@ -42,6 +51,82 @@ public class ClanControl extends JavaPlugin {
         }
     }
 
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
+        if(args.length > 0) {
+            if(args[0].equalsIgnoreCase("map")) {
+                if(sender.hasPermission("clancontrol.command.map")) {
+                    Location location = null;
+                    if(sender instanceof Player) {
+                        Player p = (Player) sender;
+                        List<BaseComponent[]> msg = getRegionManager().getRegionMap(p.getLocation());
+                        if(msg.size() > 0) {
+                            for (BaseComponent[] row : msg) {
+                                p.spigot().sendMessage(row);
+                            }
+                        } else {
+                            sender.sendMessage("The world " + p.getWorld().getName() + " cannot be controlled!");
+                        }
+                    } else {
+                        sender.sendMessage("This command can only be run by a player!");
+                    }
+                    return true;
+                } else {
+                    sender.sendMessage("You don't have the permission clancontrol.command.map");
+                }
+            } else if(args[0].equalsIgnoreCase("region")) {
+                if(sender.hasPermission("clancontrol.command.region")) {
+                    if(sender instanceof Player) {
+                        Player p = (Player) sender;
+                        Region region = null;
+                        if(args.length == 1) {
+                            region = getRegionManager().getRegion(p.getLocation());
+                        } else if(args.length == 3) {
+                            try {
+                                int x = Integer.parseInt(args[1]);
+                                try {
+                                    int z = Integer.parseInt(args[2]);
+                                    region = getRegionManager().getRegion(p.getLocation().getWorld().getName(), x, z);
+                                } catch(NumberFormatException e) {
+                                    sender.sendMessage(ChatColor.GOLD + args[2] + ChatColor.RED + " is not a valid number!");
+                                    return true;
+                                }
+                            } catch(NumberFormatException e) {
+                                sender.sendMessage(ChatColor.GOLD + args[1] + ChatColor.RED + " is not a valid number!");
+                                return true;
+                            }
+                        }
+                        if(region != null) {
+                            List<BaseComponent[]> msg = getRegionManager().getChunkMap(region, p.getLocation());
+                            if(msg.size() > 0) {
+                                p.spigot().sendMessage(new ComponentBuilder("Region " + region.getX() + " - " + region.getZ() + ". Status: " + StringUtils.capitalize(region.getStatus().toString().toLowerCase())).create());
+                                for (BaseComponent[] row : msg) {
+                                    p.spigot().sendMessage(row);
+                                }
+                            } else {
+                                sender.sendMessage("The world " + p.getWorld().getName() + " cannot be controlled!");
+                            }
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "This region does not exist!");
+                        }
+                    } else {
+                        sender.sendMessage("This command can only be run by a player!");
+                    }
+                    return true;
+                } else {
+                    sender.sendMessage("You don't have the permission clancontrol.command.region");
+                }
+            } else if(args[0].equalsIgnoreCase("reload")) {
+                if(sender.hasPermission("clancontrol.command.reload")) {
+
+                } else {
+                    sender.sendMessage("You don't have the permission clancontrol.command.reload");
+                }
+            }            
+        }
+        return false;        
+    }
+    
     public static ClanControl getInstance() {
         return instance;
     }

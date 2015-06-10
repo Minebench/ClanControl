@@ -1,9 +1,11 @@
-# The length and width of one region.
+# The length and width of one region in chunks.
 # Changing this while you already have regions will break everything!
-regiondimension: 256
+regiondimension: 16
 map:
-  world: world_pvp
+  world: world_pvp_2
+  # The total radius of the board, has to be multiple of 16 * regiondimension!
   radius: 2560
   center:
+  # The center of the board, coordinates have to be multiple of 16!
     x: 0
     z: 0
