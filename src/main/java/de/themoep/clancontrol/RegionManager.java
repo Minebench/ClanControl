@@ -13,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -349,17 +350,14 @@ public class RegionManager {
 
     /**
      * Get a map of all the regions 
-     * @param location The location of the player
+     * @param player The player who wants the map
      * @return A list of BaseComponent arrays with each line as an entry; empty list if there is no map in this world
      */
-    public List<BaseComponent[]> getRegionMap(Location location) {
+    public List<BaseComponent[]> getRegionMap(Player player) {
         List<BaseComponent[]> msg = new ArrayList<BaseComponent[]>();
-        String worldname = world;
-        Region currentRegion = null;
-        if(location != null) {
-            worldname = location.getWorld().getName();
-            currentRegion = getRegion(location);
-        }
+        String worldname = player.getWorld().getName();
+        Region currentRegion = getRegion(player.getLocation());
+        String clan = plugin.getClan(player);
         if(worldname.equals(world)) {
             int xMin = (centerX - mapradius) / (dimension * 16);
             int xMax = (centerX + mapradius) / (dimension * 16);
@@ -384,11 +382,23 @@ public class RegionManager {
                         }
                         hoverText += "\n" + ChatColor.GRAY + ChatColor.ITALIC + "Click for more Info!" + ChatColor.RESET;
                         if (region.getStatus() == RegionStatus.CONFLICT) {
-                            row.color(ChatColor.LIGHT_PURPLE);
+                            row.color(ChatColor.GOLD);
                         } else if (region.getStatus() == RegionStatus.BORDER) {
-                            row.color(ChatColor.GREEN);
+                            if(region.getController().equals(clan)) {
+                                row.color(ChatColor.GREEN);
+                            } else if(plugin.areAllied(clan, region.getController())) {
+                                row.color(ChatColor.AQUA);
+                            } else {
+                                row.color(ChatColor.RED);
+                            }
                         } else if (region.getStatus() == RegionStatus.CENTER) {
-                            row.color(ChatColor.DARK_GREEN);
+                            if(region.getController().equals(clan)) {
+                                row.color(ChatColor.DARK_GREEN);
+                            } else if(plugin.areAllied(clan, region.getController())) {
+                                row.color(ChatColor.DARK_AQUA);
+                            } else {
+                                row.color(ChatColor.DARK_RED);
+                            }
                         } else {
                             row.color(ChatColor.DARK_GRAY);
                         }
@@ -409,21 +419,19 @@ public class RegionManager {
 
     /**
      * Get a map of all the chunks in a region
-     * @param location The location of the player
+     * @param player The player who wants the map
+     * @param region The region to get the map of
      * @return A list of BaseComponent arrays with each line as an entry; empty list if there is no map in this world
      */
-    public List<BaseComponent[]> getChunkMap(Region region, Location location) {
+    public List<BaseComponent[]> getChunkMap(Player player, Region region) {
         List<BaseComponent[]> msg = new ArrayList<BaseComponent[]>();
         int xMin = region.getX() * dimension;
         int xMax = xMin + dimension;
         int zMin = region.getZ() * dimension;
         int zMax = zMin + dimension;
-        String worldname = world;
-        Chunk currentChunk = null;
-        if(location != null) {
-            worldname = location.getWorld().getName();
-            currentChunk = location.getWorld().getChunkAt(location);
-        }
+        String worldname = player.getWorld().getName();
+        Chunk currentChunk = player.getLocation().getChunk();
+        String clan = plugin.getClan(player);
         if(worldname.equals(world)) {
             for (int z = zMin; z < zMax; z++) {
                 ComponentBuilder row = new ComponentBuilder("");
@@ -438,7 +446,13 @@ public class RegionManager {
                     }
                     OccupiedChunk chunk = getChunk(worldname, x, z);
                     if (chunk != null) {
-                        row.color(ChatColor.GREEN);
+                        if(chunk.getClan().equals(clan)) {
+                            row.color(ChatColor.GREEN);
+                        } else if(plugin.areAllied(clan, chunk.getClan())) {
+                            row.color(ChatColor.AQUA);
+                        } else {
+                            row.color(ChatColor.RED);
+                        }
                         hoverText += ChatColor.RESET + "\nOwned by: " + plugin.getClanDisplay(chunk.getClan());
                     } else {
                         row.color(ChatColor.DARK_GRAY);

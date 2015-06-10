@@ -59,7 +59,7 @@ public class ClanControl extends JavaPlugin {
                     Location location = null;
                     if(sender instanceof Player) {
                         Player p = (Player) sender;
-                        List<BaseComponent[]> msg = getRegionManager().getRegionMap(p.getLocation());
+                        List<BaseComponent[]> msg = getRegionManager().getRegionMap(p);
                         if(msg.size() > 0) {
                             for (BaseComponent[] row : msg) {
                                 p.spigot().sendMessage(row);
@@ -97,7 +97,7 @@ public class ClanControl extends JavaPlugin {
                             }
                         }
                         if(region != null) {
-                            List<BaseComponent[]> msg = getRegionManager().getChunkMap(region, p.getLocation());
+                            List<BaseComponent[]> msg = getRegionManager().getChunkMap(p, region);
                             if(msg.size() > 0) {
                                 String head = "Region " + region.getX() + "/" + region.getZ();
                                 head += " - Status: " + StringUtils.capitalize(region.getStatus().toString().toLowerCase());
@@ -170,5 +170,17 @@ public class ClanControl extends JavaPlugin {
             return team.getDisplayName();
         }
         return clan;
+    }
+    
+    public boolean areAllied(String clan1, String clan2) {
+        if(clan1 != null && clan2 != null && !clan1.isEmpty() && !clan2.isEmpty()) {
+            if (simpleClans) {
+                Clan c1 = SimpleClans.getInstance().getClanManager().getClan(clan1);
+                if (c1 != null) {
+                    return c1.isAlly(clan2);
+                }
+            }
+        }
+        return false;
     }
 }
