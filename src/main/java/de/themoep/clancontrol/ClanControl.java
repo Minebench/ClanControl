@@ -95,6 +95,9 @@ public class ClanControl extends JavaPlugin {
                                 sender.sendMessage(ChatColor.GOLD + args[1] + ChatColor.RED + " is not a valid number!");
                                 return true;
                             }
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "Usage: /" + label + " region [<x> <z>]");
+                            return true;
                         }
                         if(region != null) {
                             List<BaseComponent[]> msg = getRegionManager().getChunkMap(p, region);
