@@ -268,6 +268,10 @@ public class RegionManager {
         return (chunk == null) ? null : getRegion(chunk.getWorld().getName(), chunkToRegionCoord(chunk.getX()), chunkToRegionCoord(chunk.getZ()));
     }
 
+    private int chunkToRegionCoord(int chunkCoord) {
+        return ((chunkCoord < 0 ) ? chunkCoord - 16 : chunkCoord) / dimension;
+    }
+
     /**
      * Get the Region from a worldname and x/z region coordinates
      * @param worldname
@@ -338,10 +342,6 @@ public class RegionManager {
     public ConfigAccessor getStorage() {
         return regionYml;
     }
-
-    private int chunkToRegionCoord(int chunkCoord) {
-        return ((chunkCoord < 0 ) ? chunkCoord - 1 : chunkCoord) / dimension;
-    }
     
     public World getWorld() {
         return Bukkit.getWorld(world);
@@ -368,19 +368,21 @@ public class RegionManager {
             for (int z = zMin; z <= zMax; z++) {
                 ComponentBuilder row = new ComponentBuilder("");
                 for (int x = xMin; x <= xMax; x++) {
+                    row.append(" ");
                     Region region = getRegion(worldname, x, z);
                     if (region != null) {
-                        ComponentBuilder hoverText = new ComponentBuilder("Status: " + StringUtils.capitalize(region.getStatus().toString().toLowerCase()));
+                        String hoverText = ChatColor.AQUA + "Region " + x + "/" + z + ChatColor.RESET;
+                        hoverText += "\nStatus: " + StringUtils.capitalize(region.getStatus().toString().toLowerCase());
                         if (!region.getController().isEmpty()) {
-                            hoverText.append(", Controller: " + region.getController());
+                            hoverText += ", Controller: " + region.getController();
                         }
-                        hoverText.append("\n" + ChatColor.GRAY + "Click for more Info!");
                         if (region.equals(currentRegion)) {
                             row.append("x");
-                            hoverText.append("\n" + ChatColor.YELLOW + "You are here!");
+                            hoverText += "\n" + ChatColor.YELLOW + "You are here!" + ChatColor.RESET;
                         } else {
                             row.append("o");
                         }
+                        hoverText += "\n" + ChatColor.GRAY + ChatColor.ITALIC + "Click for more Info!" + ChatColor.RESET;
                         if (region.getStatus() == RegionStatus.CONFLICT) {
                             row.color(ChatColor.LIGHT_PURPLE);
                         } else if (region.getStatus() == RegionStatus.BORDER) {
@@ -390,7 +392,7 @@ public class RegionManager {
                         } else {
                             row.color(ChatColor.DARK_GRAY);
                         }
-                        HoverEvent chunkHover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText.create());
+                        HoverEvent chunkHover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverText).create());
                         ClickEvent chunkClick = new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/control region " + region.getX() + " " + region.getZ());
                         row.event(chunkHover);
                         row.event(chunkClick);
@@ -398,11 +400,6 @@ public class RegionManager {
                         row.append("-");
                         row.color(ChatColor.DARK_GRAY);
                     }
-                    if (x < xMax) {
-                        row.append(" ");
-                        row.reset();
-                    }
-
                 }
                 msg.add(row.create());
             }
@@ -422,40 +419,32 @@ public class RegionManager {
         int zMin = region.getZ() * dimension;
         int zMax = zMin + dimension;
         String worldname = world;
-        OccupiedChunk currentChunk = null;
+        Chunk currentChunk = null;
         if(location != null) {
             worldname = location.getWorld().getName();
-            currentChunk = getChunk(location);
+            currentChunk = location.getWorld().getChunkAt(location);
         }
         if(worldname.equals(world)) {
             for (int z = zMin; z < zMax; z++) {
                 ComponentBuilder row = new ComponentBuilder("");
                 for (int x = xMin; x < xMax; x++) {
-                    String hoverText = "";
+                    row.append(" ");
+                    String hoverText = ChatColor.AQUA + "Chunk " + x + "/" + z;
                     if (currentChunk != null && currentChunk.getX() == x && currentChunk.getZ() == z) {
                         row.append("x");
-                        hoverText += ChatColor.YELLOW + "You are here!";
+                        hoverText += "\n" + ChatColor.YELLOW + "You are here!";
                     } else {
                         row.append("o");
                     }
                     OccupiedChunk chunk = getChunk(worldname, x, z);
                     if (chunk != null) {
-                        row.color(ChatColor.DARK_GREEN);
-                        if (!hoverText.isEmpty()) {
-                            hoverText += "\n" + ChatColor.RESET;
-                        }
-                        hoverText += chunk.getClan();
+                        row.color(ChatColor.GREEN);
+                        hoverText += ChatColor.RESET + "\n" + chunk.getClan();
                     } else {
                         row.color(ChatColor.DARK_GRAY);
                     }
-                    if (!hoverText.isEmpty()) {
-                        HoverEvent clanHover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverText).create());
-                        row.event(clanHover);
-                    }
-                    if (x < xMax) {
-                        row.append(" ");
-                        row.reset();
-                    }
+                    HoverEvent clanHover = new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverText).create());
+                    row.event(clanHover);
                 }
                 msg.add(row.create());
             }

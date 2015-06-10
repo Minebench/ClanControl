@@ -99,7 +99,7 @@ public class ClanControl extends JavaPlugin {
                         if(region != null) {
                             List<BaseComponent[]> msg = getRegionManager().getChunkMap(region, p.getLocation());
                             if(msg.size() > 0) {
-                                p.spigot().sendMessage(new ComponentBuilder("Region " + region.getX() + " - " + region.getZ() + ". Status: " + StringUtils.capitalize(region.getStatus().toString().toLowerCase())).create());
+                                p.spigot().sendMessage(new ComponentBuilder("Region " + region.getX() + "/" + region.getZ() + ". Status: " + StringUtils.capitalize(region.getStatus().toString().toLowerCase())).create());
                                 for (BaseComponent[] row : msg) {
                                     p.spigot().sendMessage(row);
                                 }
