@@ -374,7 +374,7 @@ public class RegionManager {
                         String hoverText = ChatColor.AQUA + "Region " + x + "/" + z + ChatColor.RESET;
                         hoverText += "\nStatus: " + StringUtils.capitalize(region.getStatus().toString().toLowerCase());
                         if (!region.getController().isEmpty()) {
-                            hoverText += ", Controller: " + region.getController();
+                            hoverText += "\nController: " + plugin.getClanDisplay(region.getController());
                         }
                         if (region.equals(currentRegion)) {
                             row.append("x");
@@ -439,7 +439,7 @@ public class RegionManager {
                     OccupiedChunk chunk = getChunk(worldname, x, z);
                     if (chunk != null) {
                         row.color(ChatColor.GREEN);
-                        hoverText += ChatColor.RESET + "\n" + chunk.getClan();
+                        hoverText += ChatColor.RESET + "\n" + plugin.getClanDisplay(chunk.getClan());
                     } else {
                         row.color(ChatColor.DARK_GRAY);
                     }

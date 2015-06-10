@@ -99,7 +99,12 @@ public class ClanControl extends JavaPlugin {
                         if(region != null) {
                             List<BaseComponent[]> msg = getRegionManager().getChunkMap(region, p.getLocation());
                             if(msg.size() > 0) {
-                                p.spigot().sendMessage(new ComponentBuilder("Region " + region.getX() + "/" + region.getZ() + ". Status: " + StringUtils.capitalize(region.getStatus().toString().toLowerCase())).create());
+                                String head = "Region " + region.getX() + "/" + region.getZ();
+                                head += " - Status: " + StringUtils.capitalize(region.getStatus().toString().toLowerCase());
+                                if(!region.getController().isEmpty()) {
+                                    head += " - Controller: " + getClanDisplay(region.getController());
+                                }
+                                p.spigot().sendMessage(new ComponentBuilder(head).create());
                                 for (BaseComponent[] row : msg) {
                                     p.spigot().sendMessage(row);
                                 }
@@ -141,7 +146,7 @@ public class ClanControl extends JavaPlugin {
             if(cp != null) {
                 Clan c = cp.getClan();
                 if(c != null) {
-                    return c.getName();
+                    return c.getTag();
                 }
             }
             return null;
@@ -151,5 +156,19 @@ public class ClanControl extends JavaPlugin {
             return team.getName();
         }
         return null;
+    }
+
+    public String getClanDisplay(String clan) {
+        if(simpleClans) {
+            Clan c = SimpleClans.getInstance().getClanManager().getClan(clan);
+            if(c != null) {
+                return c.getColorTag();
+            }
+        }
+        Team team = getServer().getScoreboardManager().getMainScoreboard().getTeam(clan);
+        if(team != null) {
+            return team.getDisplayName();
+        }
+        return clan;
     }
 }

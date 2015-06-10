@@ -51,7 +51,7 @@ public class BlockListener implements Listener {
                     for (Block b : beacons) {
                         boolean success = plugin.getRegionManager().registerBeacon(clan, b.getLocation());
                         if (success) {
-                            event.getPlayer().sendMessage(ChatColor.YELLOW + "You registered this chunk for " + clan);
+                            event.getPlayer().sendMessage(ChatColor.YELLOW + "You registered this chunk for " + plugin.getClanDisplay(clan));
                         }
                     }
                 }
@@ -149,7 +149,7 @@ public class BlockListener implements Listener {
                             }
                         }
                         if (unregistered) {
-                            event.getPlayer().sendMessage(ChatColor.YELLOW + "You unregistered this chunk for " + clan);
+                            event.getPlayer().sendMessage(ChatColor.YELLOW + "You unregistered this chunk for " + plugin.getClanDisplay(clan));
                         }
                     }
                 }
