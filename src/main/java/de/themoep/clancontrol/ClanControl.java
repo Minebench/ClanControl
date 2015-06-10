@@ -65,6 +65,6 @@ public class ClanControl extends JavaPlugin {
         if(team != null) {
             return team.getName();
         }
-        return player.getName();
+        return null;
     }
 }

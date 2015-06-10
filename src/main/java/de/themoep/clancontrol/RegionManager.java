@@ -155,6 +155,12 @@ public class RegionManager {
         }
     }
 
+    /**
+     * Registers a beacon for a clan
+     * @param clan
+     * @param location
+     * @return True if it got registered, false if not (e.g. when the location is outside the board or the chunk is already registered)
+     */
     public boolean registerBeacon(String clan, Location location) {
         if(getChunk(location) == null) {
             if(Math.abs((int) (mapradius/dimension) * dimension + centerX) < Math.abs(location.getBlockX())
@@ -174,6 +180,18 @@ public class RegionManager {
                     chunkCoords.get(chunk.getX()).put(chunk.getZ(), chunk);
                     return true;
                 }
+            }
+        }
+        return false;
+    }
+    
+    public boolean unregisterChunk(OccupiedChunk chunk) {
+        if(chunkCoords.containsKey(chunk.getX()) && chunkCoords.get(chunk.getX()).containsKey(chunk.getZ()) && chunk.equals(chunkCoords.get(chunk.getX()).get(chunk.getZ()))) {
+            chunkCoords.get(chunk.getX()).remove(chunk.getZ());
+            Region region = getRegion(chunk);
+            if(region != null) {
+                region.removeChunk(chunk);
+                return true;
             }
         }
         return false;

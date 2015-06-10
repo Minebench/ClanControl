@@ -133,6 +133,18 @@ public class Region {
     }
 
     /**
+     * Remove an OccupiedChunk from this region
+     * @param chunk
+     */
+    public void removeChunk(OccupiedChunk chunk) {
+        if(getStatus() != RegionStatus.CENTER || getController().equals(chunk.getClan())) {
+            occupiedCunks.remove(chunk);
+            getRegionManager().recalculateBoard(this);
+            save();
+        }
+    }
+
+    /**
      * Calculate the status and the controller of this region
      * @param chunkRatio The ratio of chunks a clan needs to occupy before he can control a region
      * @return The name of the resulting controller; empty string if there is none; null if no change
