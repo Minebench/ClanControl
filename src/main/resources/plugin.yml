@@ -12,6 +12,12 @@ commands:
       permission: clancontrol.command
       permission-message: You don't have the permission <permission>
 permissions:
+   clancontrol.chunks.claim:
+      description: Gives permission to claim chunks
+      default: false
+   clancontrol.chunks.unclaim:
+      description: Gives permission to unclaim chunks
+      default: false
    clancontrol.command:
       description: Gives permission to use the command
       default: true      

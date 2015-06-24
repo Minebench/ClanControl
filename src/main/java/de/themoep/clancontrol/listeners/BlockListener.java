@@ -51,14 +51,14 @@ public class BlockListener implements Listener {
                 String clan = plugin.getClan(event.getPlayer());
                 boolean chunkNotControlledByPlayerClan = chunk != null && !chunk.getClan().equals(clan);
                 boolean regionNotControlledByPlayerClan = region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan);
-                if (plugin.protectBlocks && (chunkNotControlledByPlayerClan || regionNotControlledByPlayerClan)) {
+                if(plugin.protectBlocks && (chunkNotControlledByPlayerClan || regionNotControlledByPlayerClan)) {
                     event.setCancelled(true);
-                } else if (clan != null && (event.getBlock().getType() == Material.BEACON || beaconBaseMaterial.contains(event.getBlock().getType()))) {
+                } else if(clan != null && (event.getBlock().getType() == Material.BEACON || beaconBaseMaterial.contains(event.getBlock().getType())) && event.getPlayer().hasPermission("clancontrol.chunks.claim")) {
                     List<Block> beacons = getCompletedBeacons(event.getBlock());
                     for (Block b : beacons) {
                         boolean success = plugin.getRegionManager().registerBeacon(clan, b.getLocation());
                         if (success) {
-                            event.getPlayer().sendMessage(ChatColor.YELLOW + "You registered this chunk for " + plugin.getClanDisplay(clan));
+                            event.getPlayer().sendMessage(ChatColor.YELLOW + "You claimed this chunk for " + plugin.getClanDisplay(clan));
                         }
                     }
                 }
@@ -140,20 +140,28 @@ public class BlockListener implements Listener {
                     event.setCancelled(true);
                     return;
                 } else if(chunk != null && chunk.getClan().equals(clan)) {
-                    boolean unregistered = false;
                     if(event.getBlock().getType() == Material.BEACON && event.getBlock().equals(chunk.getBeacon())) {
-                        unregistered = plugin.getRegionManager().unregisterChunk(chunk);
+                        if(event.getPlayer().hasPermission("clancontrol.chunks.unclaim")) {
+                            event.getPlayer().sendMessage(ChatColor.YELLOW + "You unclaimed this chunk for " + plugin.getClanDisplay(clan));
+                            plugin.getRegionManager().unregisterChunk(chunk);
+                        } else {
+                            event.getPlayer().sendMessage(ChatColor.RED + "You do not have the permission to unclaim chunks for " + plugin.getClanDisplay(clan) + "!");
+                            event.setCancelled(true);
+                        }
                     } else if(beaconBaseMaterial.contains(event.getBlock().getType())) {
                         List<Block> beacons = getCompletedBeacons(event.getBlock());
                         for(Block b : beacons) {
                             if(b.equals(chunk.getBeacon())) {
-                                unregistered = plugin.getRegionManager().unregisterChunk(chunk);
+                                if(event.getPlayer().hasPermission("clancontrol.chunks.unclaim")) {
+                                    event.getPlayer().sendMessage(ChatColor.YELLOW + "You unclaimed this chunk for " + plugin.getClanDisplay(clan));
+                                    plugin.getRegionManager().unregisterChunk(chunk);
+                                } else {
+                                    event.getPlayer().sendMessage(ChatColor.RED + "You do not have the permission to unclaim chunks for " + plugin.getClanDisplay(clan) + "!");
+                                    event.setCancelled(true);
+                                }
                                 break;
                             }
                         }
-                    }
-                    if (unregistered) {
-                        event.getPlayer().sendMessage(ChatColor.YELLOW + "You unregistered this chunk for " + plugin.getClanDisplay(clan));
                     }
 
                 }
