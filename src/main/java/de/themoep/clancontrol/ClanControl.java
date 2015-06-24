@@ -1,6 +1,7 @@
 package de.themoep.clancontrol;
 
 import de.themoep.clancontrol.listeners.BlockListener;
+import de.themoep.clancontrol.listeners.InteractListener;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -39,10 +40,28 @@ public class ClanControl extends JavaPlugin {
     private RegionManager regionManager;
     boolean simpleClans = false;
     
+    public static boolean protectBlocks;
+    public static boolean protectContainer;
+    public static boolean protectDoors;
+    public static boolean protectRedstone;
+    public static boolean protectEntities;
+    public static boolean protectExplosions;
+    public static boolean protectUse;
+    public static boolean protectEverything;
+    
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
-        getServer().getPluginManager().registerEvents(new BlockListener(), getInstance());
+        protectBlocks = getConfig().getBoolean("protection.blocks");
+        protectContainer = getConfig().getBoolean("protection.container");
+        protectDoors = getConfig().getBoolean("protection.doors");
+        protectRedstone = getConfig().getBoolean("protection.redstone");
+        protectEntities = getConfig().getBoolean("protection.entities");
+        protectExplosions = getConfig().getBoolean("protection.explosions");
+        protectUse = getConfig().getBoolean("protection.use");
+        protectEverything = getConfig().getBoolean("protection.everything");
+        getServer().getPluginManager().registerEvents(new BlockListener(getInstance()), getInstance());
+        getServer().getPluginManager().registerEvents(new InteractListener(getInstance()), getInstance());
         regionManager = new RegionManager(getInstance());
         getLogger().info("Searching for SimpleClans...");
         simpleClans = getServer().getPluginManager().getPlugin("SimpleClans") != null;

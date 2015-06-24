@@ -9,3 +9,12 @@ map:
   # The center of the board, coordinates have to be multiple of 16!
     x: 0
     z: 0
+protection:
+  blocks: true
+  container: true
+  doors: true
+  redstone: true
+  entities: true
+  explosions: true
+  use: true
+  everything: false
