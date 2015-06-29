@@ -7,6 +7,7 @@ import de.themoep.clancontrol.RegionStatus;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -51,14 +52,30 @@ public class BlockListener implements Listener {
                 String clan = plugin.getClan(event.getPlayer());
                 boolean chunkNotControlledByPlayerClan = chunk != null && !chunk.getClan().equals(clan);
                 boolean regionNotControlledByPlayerClan = region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan);
+                boolean occludingBlockAboveBeacon = chunk != null && event.getBlock().getType().isOccluding() && chunk.getBeacon().getY() < event.getBlock().getY() && chunk.getBeacon().getX() == event.getBlock().getX() && chunk.getBeacon().getZ() == event.getBlock().getZ();
                 if(plugin.protectBlocks && (chunkNotControlledByPlayerClan || regionNotControlledByPlayerClan)) {
+                    event.getPlayer().sendMessage(ChatColor.RED + "You can't place blocks here!");
+                    event.setCancelled(true);
+                } else if(occludingBlockAboveBeacon) {
+                    event.getPlayer().sendMessage(ChatColor.RED + "You can't place beam obstructing blocks above a chunks beacon!");
                     event.setCancelled(true);
                 } else if(clan != null && (event.getBlock().getType() == Material.BEACON || beaconBaseMaterial.contains(event.getBlock().getType())) && event.getPlayer().hasPermission("clancontrol.chunks.claim")) {
                     List<Block> beacons = getCompletedBeacons(event.getBlock());
-                    for (Block b : beacons) {
-                        boolean success = plugin.getRegionManager().registerBeacon(clan, b.getLocation());
-                        if (success) {
-                            event.getPlayer().sendMessage(ChatColor.YELLOW + "You claimed this chunk for " + plugin.getClanDisplay(clan));
+                    beaconloop: for (Block b : beacons) {
+                        Block highest = b.getWorld().getHighestBlockAt(b.getLocation());
+                        if(!highest.getType().isOccluding()) {
+                            Block above = b;
+                            while(b.getY() < highest.getY()) {
+                                b = b.getRelative(BlockFace.UP);
+                                if(b.getType().isOccluding()) {
+                                    event.getPlayer().sendMessage(ChatColor.RED + "There is a block above the beacon that is obstructing the beam!");
+                                    continue beaconloop;
+                                }
+                            }
+                            boolean success = plugin.getRegionManager().registerBeacon(clan, b.getLocation());
+                            if (success) {
+                                event.getPlayer().sendMessage(ChatColor.YELLOW + "You claimed this chunk for " + plugin.getClanDisplay(clan));
+                            }
                         }
                     }
                 }
