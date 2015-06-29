@@ -6,7 +6,7 @@ authors: [Phoenix616]
 softdepend: [SimpleClans]
 commands:
    clancontrol:
-      aliases: [control]
+      aliases: [control, c]
       description: Command description.
       usage: /<command> [map|region|reload]
       permission: clancontrol.command
