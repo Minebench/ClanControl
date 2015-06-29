@@ -110,6 +110,7 @@ public class InteractListener implements Listener {
         if(!event.isCancelled()) {
             if(plugin.protectUse
                     && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)
+                    && event.getItem() != null
                     && !event.getItem().getType().isEdible()
                     && !allowUseMaterials.contains(event.getItem().getType())
                     ) {
