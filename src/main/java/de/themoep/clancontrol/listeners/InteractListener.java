@@ -139,7 +139,7 @@ public class InteractListener implements Listener {
                     OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getClickedBlock().getLocation());
                     Region region = plugin.getRegionManager().getRegion(event.getClickedBlock().getLocation());
                     String clan = plugin.getClan(event.getPlayer());
-                    if(chunk != null && !clan.equals(chunk.getClan()) || region != null && region.getStatus() == RegionStatus.CENTER && !clan.equals(region.getController())) {
+                    if(chunk != null && !chunk.getClan().equals(clan) || region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan)) {
                         event.getPlayer().sendMessage(ChatColor.RED + "You are not allowed to do this here!");
                         event.setCancelled(true);
                         return;
