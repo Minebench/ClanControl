@@ -5,6 +5,7 @@ import de.themoep.clancontrol.OccupiedChunk;
 import de.themoep.clancontrol.Region;
 import de.themoep.clancontrol.RegionStatus;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -12,6 +13,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
 import java.util.ArrayList;
@@ -52,7 +55,7 @@ public class BlockListener implements Listener {
                 String clan = plugin.getClan(event.getPlayer());
                 boolean chunkNotControlledByPlayerClan = chunk != null && !chunk.getClan().equals(clan);
                 boolean regionNotControlledByPlayerClan = region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan);
-                boolean occludingBlockAboveBeacon = chunk != null && event.getBlock().getType().isOccluding() && chunk.getBeacon().getY() < event.getBlock().getY() && chunk.getBeacon().getX() == event.getBlock().getX() && chunk.getBeacon().getZ() == event.getBlock().getZ();
+                boolean occludingBlockAboveBeacon = chunk != null && event.getBlock().getType().isOccluding() && chunk.getBeacon() != null && chunk.getBeacon().getY() < event.getBlock().getY() && chunk.getBeacon().getX() == event.getBlock().getX() && chunk.getBeacon().getZ() == event.getBlock().getZ();
                 if(plugin.protectBlocks && (chunkNotControlledByPlayerClan || regionNotControlledByPlayerClan)) {
                     event.getPlayer().sendMessage(ChatColor.RED + "You can't place blocks here!");
                     event.setCancelled(true);
@@ -180,7 +183,52 @@ public class BlockListener implements Listener {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+    
+    @EventHandler
+    public void onPistonExtendBlock(BlockPistonExtendEvent event) {
+        if(!event.isCancelled() && event.getBlock().getWorld().equals(plugin.getRegionManager().getWorld())) {
+            if(event.getDirection() != BlockFace.DOWN && event.getDirection() != BlockFace.UP) {
+                for(Block b : event.getBlocks()) {
+                    if(b.getType().isOccluding()) {
+                        OccupiedChunk oldChunk = plugin.getRegionManager().getChunk(b.getLocation());
+                        boolean oldBlockAboveBeacon = oldChunk != null && oldChunk.getBeacon() != null && oldChunk.getBeacon().getY() < b.getY() && oldChunk.getBeacon().getX() == b.getX() && oldChunk.getBeacon().getZ() == b.getZ();
+                        if(!oldBlockAboveBeacon) {
+                            Location resultlocation = b.getRelative(event.getDirection()).getLocation();
+                            OccupiedChunk newChunk = plugin.getRegionManager().getChunk(resultlocation);
+                            boolean newBlockAboveBeacon = newChunk != null && newChunk.getBeacon() != null && newChunk.getBeacon().getY() < resultlocation.getY() && newChunk.getBeacon().getX() == resultlocation.getX() && newChunk.getBeacon().getZ() == resultlocation.getZ();
+                            if (newBlockAboveBeacon) {
+                                event.setCancelled(true);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
+    @EventHandler
+    public void onPistonExtendBlock(BlockPistonRetractEvent event) {
+        if(!event.isCancelled() && event.isSticky() && event.getBlock().getWorld().equals(plugin.getRegionManager().getWorld())) {
+            if(event.getDirection() != BlockFace.DOWN && event.getDirection() != BlockFace.UP) {
+                for(Block b : event.getBlocks()) {
+                    if(b.getType().isOccluding()) {
+                        OccupiedChunk oldChunk = plugin.getRegionManager().getChunk(b.getLocation());
+                        boolean oldBlockAboveBeacon = oldChunk != null && oldChunk.getBeacon() != null && oldChunk.getBeacon().getY() < b.getY() && oldChunk.getBeacon().getX() == b.getX() && oldChunk.getBeacon().getZ() == b.getZ();
+                        if(!oldBlockAboveBeacon) {
+                            Location resultlocation = b.getRelative(event.getDirection()).getLocation();
+                            OccupiedChunk newChunk = plugin.getRegionManager().getChunk(resultlocation);
+                            boolean newBlockAboveBeacon = newChunk != null && newChunk.getBeacon() != null && newChunk.getBeacon().getY() < resultlocation.getY() && newChunk.getBeacon().getX() == resultlocation.getX() && newChunk.getBeacon().getZ() == resultlocation.getZ();
+                            if (newBlockAboveBeacon) {
+                                event.setCancelled(true);
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
