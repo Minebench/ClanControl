@@ -40,14 +40,14 @@ public class ClanControl extends JavaPlugin {
     private RegionManager regionManager;
     boolean simpleClans = false;
     
-    public static boolean protectBlocks;
-    public static boolean protectContainer;
-    public static boolean protectDoors;
-    public static boolean protectRedstone;
-    public static boolean protectEntities;
-    public static boolean protectExplosions;
-    public static boolean protectUse;
-    public static boolean protectEverything;
+    public boolean protectBlocks;
+    public boolean protectContainer;
+    public boolean protectDoors;
+    public boolean protectRedstone;
+    public boolean protectEntities;
+    public boolean protectExplosions;
+    public boolean protectUse;
+    public boolean protectEverything;
     
     public void onEnable() {
         instance = this;

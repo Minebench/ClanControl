@@ -38,46 +38,43 @@ public class InteractListener implements Listener {
 
     private ClanControl plugin;
 
-    private static List<Material> allowUseMaterials = Arrays.asList(new Material[]{
+    private static List<Material> allowUseMaterials = Arrays.asList(
             Material.BOW,
             Material.POTION,
             Material.DIAMOND_SWORD,
             Material.GOLD_SWORD,
             Material.IRON_SWORD,
             Material.STONE_SWORD,
-            Material.WOOD_SWORD,
-    });
-    private static List<Material> containerMaterials = Arrays.asList(new Material[]{
-            Material.CHEST, 
-            Material.TRAPPED_CHEST, 
-            Material.HOPPER, 
-            Material.DROPPER, 
-            Material.BEACON, 
-            Material.DISPENSER, 
-            Material.FURNACE, 
-            Material.BREWING_STAND, 
+            Material.WOOD_SWORD);
+    private static List<Material> containerMaterials = Arrays.asList(
+            Material.CHEST,
+            Material.TRAPPED_CHEST,
+            Material.HOPPER,
+            Material.DROPPER,
+            Material.BEACON,
+            Material.DISPENSER,
+            Material.FURNACE,
+            Material.BREWING_STAND,
             Material.CAULDRON,
-            Material.COMMAND
-    });
-    private static List<Material> doorMaterials = Arrays.asList(new Material[]{
-            Material.ACACIA_DOOR, 
-            Material.BIRCH_DOOR, 
-            Material.DARK_OAK_DOOR, 
-            Material.IRON_DOOR, 
-            Material.JUNGLE_DOOR, 
-            Material.SPRUCE_DOOR, 
-            Material.TRAP_DOOR, 
-            Material.IRON_TRAPDOOR, 
-            Material.WOOD_DOOR, 
-            Material.WOODEN_DOOR, 
-            Material.FENCE_GATE, 
+            Material.COMMAND);
+    private static List<Material> doorMaterials = Arrays.asList(
+            Material.ACACIA_DOOR,
+            Material.BIRCH_DOOR,
+            Material.DARK_OAK_DOOR,
+            Material.IRON_DOOR,
+            Material.JUNGLE_DOOR,
+            Material.SPRUCE_DOOR,
+            Material.TRAP_DOOR,
+            Material.IRON_TRAPDOOR,
+            Material.WOOD_DOOR,
+            Material.WOODEN_DOOR,
+            Material.FENCE_GATE,
             Material.ACACIA_FENCE_GATE,
             Material.BIRCH_FENCE_GATE,
             Material.DARK_OAK_FENCE_GATE,
             Material.JUNGLE_FENCE_GATE,
-            Material.SPRUCE_FENCE_GATE
-    });
-    private static List<Material> redstoneMaterials = Arrays.asList(new Material[]{
+            Material.SPRUCE_FENCE_GATE);
+    private static List<Material> redstoneMaterials = Arrays.asList(
             Material.LEVER,
             Material.STONE_BUTTON,
             Material.WOOD_BUTTON,
@@ -85,9 +82,8 @@ public class InteractListener implements Listener {
             Material.DIODE_BLOCK_OFF,
             Material.REDSTONE_COMPARATOR_ON,
             Material.REDSTONE_COMPARATOR_OFF,
-            Material.COMMAND
-    });
-    private static List<EntityType> blockEntityTypes = Arrays.asList(new EntityType[]{
+            Material.COMMAND);
+    private static List<EntityType> blockEntityTypes = Arrays.asList(
             EntityType.ARMOR_STAND,
             EntityType.PAINTING,
             EntityType.ITEM_FRAME,
@@ -98,8 +94,7 @@ public class InteractListener implements Listener {
             EntityType.MINECART_HOPPER,
             EntityType.MINECART_MOB_SPAWNER,
             EntityType.MINECART_TNT,
-            EntityType.MINECART
-    });
+            EntityType.MINECART);
 
     public InteractListener(ClanControl plugin) {
         this.plugin = plugin;
