@@ -40,7 +40,7 @@ public class BlockListener implements Listener {
 
     private ClanControl plugin;
     
-    private static List<Material> beaconBaseMaterial = Arrays.asList(new Material[] {Material.IRON_BLOCK, Material.GOLD_BLOCK, Material.DIAMOND_BLOCK, Material.EMERALD_BLOCK});
+    private static List<Material> beaconBaseMaterial = Arrays.asList(Material.IRON_BLOCK, Material.GOLD_BLOCK, Material.DIAMOND_BLOCK, Material.EMERALD_BLOCK);
 
     public BlockListener(ClanControl plugin) {
         this.plugin = plugin;
