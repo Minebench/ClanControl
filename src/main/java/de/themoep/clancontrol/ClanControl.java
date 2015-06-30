@@ -2,6 +2,7 @@ package de.themoep.clancontrol;
 
 import de.themoep.clancontrol.listeners.BlockListener;
 import de.themoep.clancontrol.listeners.InteractListener;
+import de.themoep.clancontrol.listeners.MoveListener;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -10,12 +11,14 @@ import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Team;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,6 +65,7 @@ public class ClanControl extends JavaPlugin {
         protectEverything = getConfig().getBoolean("protection.everything");
         getServer().getPluginManager().registerEvents(new BlockListener(getInstance()), getInstance());
         getServer().getPluginManager().registerEvents(new InteractListener(getInstance()), getInstance());
+        getServer().getPluginManager().registerEvents(new MoveListener(getInstance()), getInstance());
         regionManager = new RegionManager(getInstance());
         getLogger().info("Searching for SimpleClans...");
         simpleClans = getServer().getPluginManager().getPlugin("SimpleClans") != null;
@@ -185,6 +189,11 @@ public class ClanControl extends JavaPlugin {
         return null;
     }
 
+    /**
+     * Get the display name/tag of a clan/team
+     * @param clan
+     * @return
+     */
     public String getClanDisplay(String clan) {
         if(simpleClans) {
             Clan c = SimpleClans.getInstance().getClanManager().getClan(clan);
@@ -198,10 +207,16 @@ public class ClanControl extends JavaPlugin {
         }
         return clan;
     }
-    
+
+    /**
+     * Check if two clans/teams are allied
+     * @param clan1
+     * @param clan2
+     * @return True if they are allied or the same team/clan; false if not
+     */
     public boolean areAllied(String clan1, String clan2) {
-        if(clan1 != null && clan2 != null && !clan1.isEmpty() && !clan2.isEmpty()) {
-            if (simpleClans) {
+        if(clan1 != null && clan2 != null && !clan1.isEmpty() && !clan2.isEmpty() && !clan1.equals(clan2)) {
+            if(simpleClans) {
                 Clan c1 = SimpleClans.getInstance().getClanManager().getClan(clan1);
                 if (c1 != null) {
                     return c1.isAlly(clan2);
@@ -209,5 +224,37 @@ public class ClanControl extends JavaPlugin {
             }
         }
         return false;
+    }
+
+    /**
+     * Send a message to all online players of a clan/team
+     * @param clan
+     * @param msg
+     */
+    public void notifyClan(String clan, String msg) {
+        List<Player> playerList = new ArrayList<Player>();
+        if(simpleClans) {
+            Clan sClan = SimpleClans.getInstance().getClanManager().getClan(clan);
+            if(sClan != null) {
+                for(ClanPlayer cp : sClan.getOnlineMembers()) {
+                    Player p = getServer().getPlayer(cp.getName());
+                    if(p != null) {
+                        playerList.add(p);
+                    }
+                }
+            }
+        } else {
+            Team team = getServer().getScoreboardManager().getMainScoreboard().getTeam(clan);
+            if(team != null) {
+                for(OfflinePlayer p : team.getPlayers()) {
+                    if(p.isOnline() && p instanceof Player) {
+                        playerList.add((Player) p);
+                    }
+                }
+            }
+        }
+        for(Player p : playerList) {
+            p.sendMessage(msg);
+        }
     }
 }
