@@ -162,6 +162,11 @@ public class ClanControl extends JavaPlugin {
         return regionManager;
     }
 
+    /**
+     * Get the name of the team or clan of a player
+     * @param player
+     * @return The name of the team/clan; null if the player doesn't have one
+     */
     public String getClan(Player player) {
         if(simpleClans) {
             ClanPlayer cp = SimpleClans.getInstance().getClanManager().getClanPlayer(player);
@@ -171,11 +176,11 @@ public class ClanControl extends JavaPlugin {
                     return c.getTag();
                 }
             }
-            return null;
-        }
-        Team team = getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
-        if(team != null) {
-            return team.getName();
+        } else {
+            Team team = getServer().getScoreboardManager().getMainScoreboard().getPlayerTeam(player);
+            if (team != null) {
+                return team.getName();
+            }
         }
         return null;
     }

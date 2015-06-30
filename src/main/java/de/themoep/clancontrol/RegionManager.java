@@ -465,4 +465,28 @@ public class RegionManager {
         }
         return msg;
     }
+
+    /**
+     * Check if a player can build at the specific location
+     * @param player
+     * @param location
+     * @return
+     */
+    public boolean canBuild(Player player, Location location) {
+        if(location.getWorld().equals(getWorld())) {
+            OccupiedChunk chunk = getChunk(location);
+            Region region = getRegion(location);
+            String clan = plugin.getClan(player);
+            if(chunk != null && !chunk.getClan().equals(clan)) {
+                return false;
+            }
+            if(region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan)) {
+                if(chunk != null && chunk.getClan().equals(clan)) {
+                    return true;
+                }
+                return false;
+            }
+        }
+        return true;
+    }
 }

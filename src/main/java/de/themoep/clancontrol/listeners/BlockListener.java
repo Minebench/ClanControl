@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -51,15 +52,12 @@ public class BlockListener implements Listener {
         if(!event.isCancelled()) {
             if(event.getBlock().getWorld().equals(plugin.getRegionManager().getWorld())) {
                 OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getBlock().getLocation());
-                Region region = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
                 String clan = plugin.getClan(event.getPlayer());
-                boolean chunkNotControlledByPlayerClan = chunk != null && !chunk.getClan().equals(clan);
-                boolean regionNotControlledByPlayerClan = region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan);
-                boolean occludingBlockAboveBeacon = chunk != null && event.getBlock().getType().isOccluding() && chunk.getBeacon() != null && chunk.getBeacon().getY() < event.getBlock().getY() && chunk.getBeacon().getX() == event.getBlock().getX() && chunk.getBeacon().getZ() == event.getBlock().getZ();
-                if(plugin.protectBlocks && (chunkNotControlledByPlayerClan || regionNotControlledByPlayerClan)) {
+                boolean blockIsAboveChunkBeacon = chunk != null && chunk.getBeacon() != null && chunk.getBeacon().getY() < event.getBlock().getY() && chunk.getBeacon().getX() == event.getBlock().getX() && chunk.getBeacon().getZ() == event.getBlock().getZ();
+                if(plugin.protectBlocks && !plugin.getRegionManager().canBuild(event.getPlayer(), event.getBlockPlaced().getLocation())) {
                     event.getPlayer().sendMessage(ChatColor.RED + "You can't place blocks here!");
                     event.setCancelled(true);
-                } else if(occludingBlockAboveBeacon) {
+                } else if(event.getBlock().getType().isOccluding() && blockIsAboveChunkBeacon) {
                     event.getPlayer().sendMessage(ChatColor.RED + "You can't place beam obstructing blocks above a chunks beacon!");
                     event.setCancelled(true);
                 } else if(clan != null && (event.getBlock().getType() == Material.BEACON || beaconBaseMaterial.contains(event.getBlock().getType())) && event.getPlayer().hasPermission("clancontrol.chunks.claim")) {
@@ -132,34 +130,24 @@ public class BlockListener implements Listener {
 
     @EventHandler
     public void onBlockDamage(BlockDamageEvent event) {
-        if(!event.isCancelled()) {
-            if(event.getBlock().getWorld().equals(plugin.getRegionManager().getWorld())) {
-                OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getBlock().getLocation());
-                Region region = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
-                String clan = plugin.getClan(event.getPlayer());
-                boolean chunkNotControlledByPlayerClan = chunk != null && !chunk.getClan().equals(clan);
-                boolean regionNotControlledByPlayerClan = region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan);
-                if(chunkNotControlledByPlayerClan || regionNotControlledByPlayerClan) {
-                    event.setCancelled(true);
-                    return;
-                }
+        if(!event.isCancelled() && event.getBlock().getWorld().equals(plugin.getRegionManager().getWorld())) {
+            if(plugin.protectBlocks && !plugin.getRegionManager().canBuild(event.getPlayer(), event.getBlock().getLocation())) {
+                event.setCancelled(true);
+                return;
             }
         }
     }
     
     @EventHandler 
     public void onBlockDestroy(BlockBreakEvent event) {
-        if(!event.isCancelled()) {
-            if(event.getBlock().getWorld().equals(plugin.getRegionManager().getWorld())) {
+        if(!event.isCancelled() && event.getBlock().getWorld().equals(plugin.getRegionManager().getWorld())) {
+            if(plugin.protectBlocks && !plugin.getRegionManager().canBuild(event.getPlayer(), event.getBlock().getLocation())) {
+                event.getPlayer().sendMessage(ChatColor.RED + "You can't break blocks here!");
+                event.setCancelled(true);
+            } else {
                 OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getBlock().getLocation());
-                Region region = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
                 String clan = plugin.getClan(event.getPlayer());
-                boolean chunkNotControlledByPlayerClan = chunk != null && !chunk.getClan().equals(clan);
-                boolean regionNotControlledByPlayerClan = region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan);
-                if(chunkNotControlledByPlayerClan || regionNotControlledByPlayerClan) {
-                    event.setCancelled(true);
-                    return;
-                } else if(chunk != null && chunk.getClan().equals(clan)) {
+                if(chunk != null && chunk.getClan().equals(clan)) {
                     if(event.getBlock().getType() == Material.BEACON && event.getBlock().equals(chunk.getBeacon())) {
                         if(event.getPlayer().hasPermission("clancontrol.chunks.unclaim")) {
                             event.getPlayer().sendMessage(ChatColor.YELLOW + "You unclaimed this chunk for " + plugin.getClanDisplay(clan));

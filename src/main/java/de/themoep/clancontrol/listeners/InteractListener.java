@@ -109,10 +109,7 @@ public class InteractListener implements Listener {
                     && !event.getItem().getType().isEdible()
                     && !allowUseMaterials.contains(event.getItem().getType())
                     ) {
-                OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getPlayer().getLocation());
-                Region region = plugin.getRegionManager().getRegion(event.getPlayer().getLocation());
-                String clan = plugin.getClan(event.getPlayer());
-                if(chunk != null && !clan.equals(chunk.getClan()) || region != null && region.getStatus() == RegionStatus.CENTER && !clan.equals(region.getController())) {
+                if(!plugin.getRegionManager().canBuild(event.getPlayer(), event.getPlayer().getLocation())) {
                     event.getPlayer().sendMessage(ChatColor.RED + "You are not allowed to use this here!");
                     event.setCancelled(true);
                     return;
@@ -132,10 +129,7 @@ public class InteractListener implements Listener {
                         || plugin.protectDoors && doorMaterials.contains(m)
                         || plugin.protectRedstone && redstoneMaterials.contains(m)
                         ) {
-                    OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getClickedBlock().getLocation());
-                    Region region = plugin.getRegionManager().getRegion(event.getClickedBlock().getLocation());
-                    String clan = plugin.getClan(event.getPlayer());
-                    if(chunk != null && !chunk.getClan().equals(clan) || region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan)) {
+                    if(!plugin.getRegionManager().canBuild(event.getPlayer(), event.getClickedBlock().getLocation())) {
                         event.getPlayer().sendMessage(ChatColor.RED + "You are not allowed to do this here!");
                         event.setCancelled(true);
                         return;
@@ -153,12 +147,7 @@ public class InteractListener implements Listener {
                         || plugin.protectEntities
                         || plugin.protectBlocks && blockEntityTypes.contains(event.getRightClicked().getType())
                         ) {
-                    OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getRightClicked().getLocation());
-                    Region region = plugin.getRegionManager().getRegion(event.getRightClicked().getLocation());
-                    String clan = plugin.getClan(event.getPlayer());
-                    boolean chunkNotControlledByPlayerClan = chunk != null && !chunk.getClan().equals(clan);
-                    boolean regionNotControlledByPlayerClan = region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan);
-                    if(chunkNotControlledByPlayerClan || regionNotControlledByPlayerClan) {
+                    if(!plugin.getRegionManager().canBuild(event.getPlayer(), event.getRightClicked().getLocation())) {
                         event.getPlayer().sendMessage(ChatColor.RED + "You are not allowed to do this here!");
                         event.setCancelled(true);
                         return;
@@ -176,12 +165,7 @@ public class InteractListener implements Listener {
                         || plugin.protectEntities
                         || plugin.protectBlocks && blockEntityTypes.contains(event.getEntityType())
                         ) {
-                    OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getEntity().getLocation());
-                    Region region = plugin.getRegionManager().getRegion(event.getEntity().getLocation());
-                    String clan = plugin.getClan((Player) event.getDamager());
-                    boolean chunkNotControlledByPlayerClan = chunk != null && !chunk.getClan().equals(clan);
-                    boolean regionNotControlledByPlayerClan = region != null && region.getStatus() == RegionStatus.CENTER && !region.getController().equals(clan);
-                    if(chunkNotControlledByPlayerClan || regionNotControlledByPlayerClan) {
+                    if(!plugin.getRegionManager().canBuild((Player) event.getDamager(), event.getEntity().getLocation())) {
                         event.getDamager().sendMessage(ChatColor.RED + "You are not allowed to damage " + event.getEntityType().toString() + " in this area!");
                         event.setCancelled(true);
                         return;
