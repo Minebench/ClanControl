@@ -150,7 +150,7 @@ public class Region {
      * @return The name of the resulting controller; empty string if there is none; null if no change
      */
     public String calculateControl(double chunkRatio) {
-        if (getStatus() == RegionStatus.FREE && getChunks().size() == 1) {
+        if(getStatus() == RegionStatus.FREE && getChunks().size() == 1) {
             setController(getChunks().get(0).getClan());
             calculateStatus();
             return getController();

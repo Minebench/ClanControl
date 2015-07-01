@@ -42,6 +42,7 @@ public class ClanControl extends JavaPlugin {
     private static ClanControl instance;
     private RegionManager regionManager;
     boolean simpleClans = false;
+    private String tag;
     
     public boolean protectBlocks;
     public boolean protectContainer;
@@ -51,10 +52,11 @@ public class ClanControl extends JavaPlugin {
     public boolean protectExplosions;
     public boolean protectUse;
     public boolean protectEverything;
-    
+
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
+        tag = ChatColor.translateAlternateColorCodes('&', getConfig().getString("plugintag", "&f[&cControl&f]&r"));
         protectBlocks = getConfig().getBoolean("protection.blocks");
         protectContainer = getConfig().getBoolean("protection.container");
         protectDoors = getConfig().getBoolean("protection.doors");
@@ -256,5 +258,9 @@ public class ClanControl extends JavaPlugin {
         for(Player p : playerList) {
             p.sendMessage(msg);
         }
+    }
+
+    public String getTag() {
+        return tag;
     }
 }

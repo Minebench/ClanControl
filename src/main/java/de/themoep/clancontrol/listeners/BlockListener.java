@@ -74,8 +74,8 @@ public class BlockListener implements Listener {
                                 }
                             }
                             boolean success = plugin.getRegionManager().registerBeacon(clan, b.getLocation());
-                            if (success) {
-                                event.getPlayer().sendMessage(ChatColor.YELLOW + "You claimed this chunk for " + plugin.getClanDisplay(clan));
+                            if(success) {
+                                event.getPlayer().sendMessage(ChatColor.YELLOW + "Du hast den Chunk " + b.getChunk().getX() + "/" + b.getChunk().getZ() + " für " + plugin.getClanDisplay(clan) + ChatColor.YELLOW + " eingenommen!");
                             }
                         }
                     }
@@ -153,7 +153,7 @@ public class BlockListener implements Listener {
                             event.getPlayer().sendMessage(ChatColor.YELLOW + "You unclaimed this chunk for " + plugin.getClanDisplay(clan));
                             plugin.getRegionManager().unregisterChunk(chunk);
                         } else {
-                            event.getPlayer().sendMessage(ChatColor.RED + "You do not have the permission to unclaim chunks for " + plugin.getClanDisplay(clan) + "!");
+                            event.getPlayer().sendMessage(ChatColor.RED + "You do not have the permission to unclaim chunks for " + plugin.getClanDisplay(clan));
                             event.setCancelled(true);
                         }
                     } else if(beaconBaseMaterial.contains(event.getBlock().getType())) {
@@ -161,10 +161,10 @@ public class BlockListener implements Listener {
                         for(Block b : beacons) {
                             if(b.equals(chunk.getBeacon())) {
                                 if(event.getPlayer().hasPermission("clancontrol.chunks.unclaim")) {
-                                    event.getPlayer().sendMessage(ChatColor.YELLOW + "You unclaimed this chunk for " + plugin.getClanDisplay(clan));
+                                    event.getPlayer().sendMessage(ChatColor.YELLOW + "Du hast die Sicherung des Chunks " + b.getChunk().getX() + "/" + b.getChunk().getZ() + " für deinen Clan " + plugin.getClanDisplay(clan) + ChatColor.YELLOW + " entfernt!");
                                     plugin.getRegionManager().unregisterChunk(chunk);
                                 } else {
-                                    event.getPlayer().sendMessage(ChatColor.RED + "You do not have the permission to unclaim chunks for " + plugin.getClanDisplay(clan) + "!");
+                                    event.getPlayer().sendMessage(ChatColor.RED + "You do not have the permission to unclaim chunks for " + plugin.getClanDisplay(clan));
                                     event.setCancelled(true);
                                 }
                                 break;

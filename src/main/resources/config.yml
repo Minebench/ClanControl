@@ -1,6 +1,7 @@
 # The length and width of one region in chunks.
 # Changing this while you already have regions will break everything!
 regiondimension: 16
+chunkratio: 1
 map:
   world: world_pvp_2
   # The total radius of the board, has to be multiple of 16 * regiondimension!

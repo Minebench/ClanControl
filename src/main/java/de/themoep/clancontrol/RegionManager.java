@@ -334,9 +334,21 @@ public class RegionManager {
      * @param region The region that changed
      */
     public void recalculateBoard(Region region) {
-        String controller = region.calculateControl(chunkRatio);
-        if(controller != null) {
-
+        String oldController = region.getController();
+        RegionStatus oldStatus = region.getStatus();
+        String newController = region.calculateControl(chunkRatio);
+        if(newController != null) {
+            if(oldController.isEmpty() || oldController.equals(newController)) {
+                if(oldStatus != region.getStatus()) {
+                    if(oldStatus == RegionStatus.FREE) {
+                        plugin.getServer().broadcastMessage(plugin.getTag() + " " + ChatColor.GREEN + plugin.getClanDisplay(newController) + ChatColor.GREEN + " hat die Region " + region.getX() + "/" + region.getZ() + " eingenommen!");
+                    } else  {
+                        plugin.getServer().broadcastMessage(plugin.getTag() + ChatColor.GREEN + " Region " + region.getX() + "/" + region.getZ() + " (" + plugin.getClanDisplay(newController) + ChatColor.GREEN + ") " + ChatColor.DARK_GREEN + oldStatus + " -> " + region.getStatus());
+                    }
+                }
+            } else {
+                plugin.getServer().broadcastMessage(plugin.getTag() + " " + ChatColor.GREEN + plugin.getClanDisplay(newController) + ChatColor.GREEN + " hat die Region " + region.getX() + "/" + region.getZ() + " von " + plugin.getClanDisplay(oldController) + ChatColor.GREEN + " übernommen!");
+            }
         }
     }
 
