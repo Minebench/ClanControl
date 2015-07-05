@@ -50,7 +50,7 @@ public class MoveListener implements Listener {
                             String clanDisplay = plugin.getClanDisplay(regionTo.getController());
                             event.getPlayer().sendMessage(ChatColor.YELLOW + "Du befindest dich nun in der " + regionTo.getStatus().toString() + " Region von " + clanDisplay + ChatColor.YELLOW + "!");
                             String playerclan = plugin.getClan(event.getPlayer());
-                            if(!plugin.areAllied(playerclan, regionTo.getController())) {
+                            if(!plugin.areAllied(playerclan, regionTo.getController()) && !plugin.isVanished(event.getPlayer())) {
                                 plugin.notifyClan(regionTo.getController(), clanDisplay + " " + ChatColor.RED + event.getPlayer().getName() + " hat die " + regionTo.getStatus().toString() + " Region " + regionTo.getX() + "/" + regionTo.getZ() + " deines Clans betreten!");
                             }
                         }
