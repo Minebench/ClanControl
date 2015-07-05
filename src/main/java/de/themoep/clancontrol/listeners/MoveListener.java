@@ -49,15 +49,13 @@ public class MoveListener implements Listener {
                         if(regionFrom == null || !regionFrom.getController().equals(regionTo.getController())) {
                             String playerclan = plugin.getClan(event.getPlayer());
                             if(!regionTo.getController().isEmpty()) {
-                                String clanDisplay = plugin.getClanDisplay(regionTo.getController());
-                                event.getPlayer().sendMessage(ChatColor.YELLOW + "Du befindest dich nun in der " + regionTo.getStatus().toString() + " Region von " + clanDisplay + ChatColor.YELLOW + "!");
+                                event.getPlayer().sendMessage(ChatColor.YELLOW + "Du befindest dich nun in der " + regionTo.getStatus().toString() + " Region von " + plugin.getClanDisplay(regionTo.getController()) + ChatColor.YELLOW + "!");
                                 if(!plugin.areAllied(playerclan, regionTo.getController()) && !plugin.isVanished(event.getPlayer())) {
                                     plugin.notifyClan(regionTo.getController(), ChatColor.WHITE + event.getPlayer().getName() + ChatColor.RED + "(" + plugin.getClanDisplay(playerclan) + ChatColor.RED + ") hat die " + regionTo.getStatus().toString() + " Region " + regionTo.getX() + "/" + regionTo.getZ() + " deines Clans betreten!");
                                 }
                             }
                             if(!regionFrom.getController().isEmpty()) {
-                                String clanDisplay = plugin.getClanDisplay(regionFrom.getController());
-                                event.getPlayer().sendMessage(ChatColor.YELLOW + "Du hast die " + regionFrom.getStatus().toString() + " Region von " + clanDisplay + ChatColor.YELLOW + " verlassen!");
+                                event.getPlayer().sendMessage(ChatColor.YELLOW + "Du hast die " + regionFrom.getStatus().toString() + " Region von " + plugin.getClanDisplay(regionFrom.getController()) + ChatColor.YELLOW + " verlassen!");
                                 if(!plugin.areAllied(playerclan, regionFrom.getController()) && !plugin.isVanished(event.getPlayer())) {
                                     plugin.notifyClan(regionFrom.getController(), ChatColor.WHITE + event.getPlayer().getName() + ChatColor.YELLOW + "(" + plugin.getClanDisplay(playerclan) + ChatColor.YELLOW + ") hat die " + regionFrom.getStatus().toString() + " Region " + regionTo.getX() + "/" + regionTo.getZ() + " deines Clans verlassen!");
                                 }
