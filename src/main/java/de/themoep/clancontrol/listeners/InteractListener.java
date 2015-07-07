@@ -159,7 +159,7 @@ public class InteractListener implements Listener {
 
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if(!event.isCancelled() && event.getEntity().getWorld().equals(plugin.getRegionManager().getWorld())) {
+        if(!event.isCancelled() && !(event.getEntity() instanceof Player) && event.getEntity().getWorld().equals(plugin.getRegionManager().getWorld())) {
             if(event.getDamager() instanceof Player) {
                 if(plugin.protectEverything
                         || plugin.protectEntities
@@ -177,7 +177,7 @@ public class InteractListener implements Listener {
 
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
-        if(!event.isCancelled() && event.getEntity().getWorld().equals(plugin.getRegionManager().getWorld())) {
+        if(!event.isCancelled() && !(event.getEntity() instanceof Player) && event.getEntity().getWorld().equals(plugin.getRegionManager().getWorld())) {
             if(plugin.protectExplosions && (event.getCause() == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION || event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION)) {
                 OccupiedChunk chunk = plugin.getRegionManager().getChunk(event.getEntity().getLocation());
                 Region region = plugin.getRegionManager().getRegion(event.getEntity().getLocation());
