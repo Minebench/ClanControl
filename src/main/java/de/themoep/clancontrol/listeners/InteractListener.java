@@ -124,7 +124,7 @@ public class InteractListener implements Listener {
             if(event.getClickedBlock() != null && event.getClickedBlock().getWorld().equals(plugin.getRegionManager().getWorld())) {
                 Material m = event.getClickedBlock().getType();
                 if(plugin.protectEverything 
-                        || plugin.protectUse
+                        || plugin.protectUse && (event.getItem() == null || (!event.getItem().getType().isEdible() && !allowUseMaterials.contains(event.getItem().getType())))
                         || plugin.protectContainer && containerMaterials.contains(m) 
                         || plugin.protectDoors && doorMaterials.contains(m)
                         || plugin.protectRedstone && redstoneMaterials.contains(m)
