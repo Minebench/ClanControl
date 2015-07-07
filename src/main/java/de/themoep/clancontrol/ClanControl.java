@@ -25,6 +25,7 @@ import org.kitteh.vanish.staticaccess.VanishNotLoadedException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 /**
  * ClanControl
@@ -62,19 +63,10 @@ public class ClanControl extends JavaPlugin {
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
-        tag = ChatColor.translateAlternateColorCodes('&', getConfig().getString("plugintag", "&f[&cControl&f]&r"));
-        protectBlocks = getConfig().getBoolean("protection.blocks");
-        protectContainer = getConfig().getBoolean("protection.container");
-        protectDoors = getConfig().getBoolean("protection.doors");
-        protectRedstone = getConfig().getBoolean("protection.redstone");
-        protectEntities = getConfig().getBoolean("protection.entities");
-        protectExplosions = getConfig().getBoolean("protection.explosions");
-        protectUse = getConfig().getBoolean("protection.use");
-        protectEverything = getConfig().getBoolean("protection.everything");
+        loadConfig();
         getServer().getPluginManager().registerEvents(new BlockListener(getInstance()), getInstance());
         getServer().getPluginManager().registerEvents(new InteractListener(getInstance()), getInstance());
         getServer().getPluginManager().registerEvents(new MoveListener(getInstance()), getInstance());
-        regionManager = new RegionManager(getInstance());
         getLogger().info("Searching for SimpleClans...");
         simpleClans = getServer().getPluginManager().getPlugin("SimpleClans") != null;
         if(simpleClans) {
@@ -85,6 +77,21 @@ public class ClanControl extends JavaPlugin {
             getLogger().info("Found VanishNoPacket! Hiding global messages by vanished players!");
         }
         
+    }
+    
+    private void loadConfig() {
+        getLogger().log(Level.INFO, "Reloading Config and RegionManager!");
+        reloadConfig();
+        tag = ChatColor.translateAlternateColorCodes('&', getConfig().getString("plugintag", "&f[&cControl&f]&r"));
+        protectBlocks = getConfig().getBoolean("protection.blocks");
+        protectContainer = getConfig().getBoolean("protection.container");
+        protectDoors = getConfig().getBoolean("protection.doors");
+        protectRedstone = getConfig().getBoolean("protection.redstone");
+        protectEntities = getConfig().getBoolean("protection.entities");
+        protectExplosions = getConfig().getBoolean("protection.explosions");
+        protectUse = getConfig().getBoolean("protection.use");
+        protectEverything = getConfig().getBoolean("protection.everything");
+        regionManager = new RegionManager(getInstance());
     }
 
     @Override
@@ -156,16 +163,17 @@ public class ClanControl extends JavaPlugin {
                     } else {
                         sender.sendMessage("This command can only be run by a player!");
                     }
-                    return true;
                 } else {
                     sender.sendMessage("You don't have the permission clancontrol.command.region");
                 }
+                return true;
             } else if(args[0].equalsIgnoreCase("reload")) {
                 if(sender.hasPermission("clancontrol.command.reload")) {
-
+                    sender.sendMessage("Config reloaded.");
                 } else {
                     sender.sendMessage("You don't have the permission clancontrol.command.reload");
                 }
+                return true;
             }            
         }
         return false;        

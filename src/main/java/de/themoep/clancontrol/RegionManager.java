@@ -63,6 +63,7 @@ public class RegionManager {
     }
     
     private void loadConfig() {
+        plugin.reloadConfig();
         dimension = plugin.getConfig().getInt("regiondimension", 16);
         world = plugin.getConfig().getString("map.world", "world");
         mapradius = plugin.getConfig().getInt("map.radius", 2560);
