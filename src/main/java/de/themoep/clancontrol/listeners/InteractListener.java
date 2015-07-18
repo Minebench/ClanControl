@@ -56,7 +56,10 @@ public class InteractListener implements Listener {
             Material.FURNACE,
             Material.BREWING_STAND,
             Material.CAULDRON,
-            Material.COMMAND);
+            Material.COMMAND,
+            Material.ENDER_CHEST,
+            Material.ANVIL,
+            Material.ENCHANTMENT_TABLE);
     private static List<Material> doorMaterials = Arrays.asList(
             Material.ACACIA_DOOR,
             Material.BIRCH_DOOR,
