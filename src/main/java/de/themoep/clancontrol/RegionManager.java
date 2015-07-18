@@ -10,7 +10,9 @@ import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -87,6 +89,8 @@ public class RegionManager {
         
         plugin.getLogger().info("Start loading regions from storage!");
         
+        List<OccupiedChunk> noBeacons = new ArrayList<OccupiedChunk>();
+        
         FileConfiguration config = getStorage().getConfig();        
         for(String worldname : config.getKeys(false)) {
             
@@ -108,21 +112,31 @@ public class RegionManager {
                                             
                                             ConfigurationSection chunkSect = chunksSect.getConfigurationSection(chunkX + "." + chunkZ);
                                             
+                                            Block beacon = plugin.getServer().getWorld(worldname).getBlockAt(chunkSect.getInt("beacon.x"), chunkSect.getInt("beacon.y"), chunkSect.getInt("beacon.z"));
+
                                             OccupiedChunk chunk = new OccupiedChunk(
-                                                    worldname, 
-                                                    chunkX, 
-                                                    chunkZ, 
+                                                    worldname,
+                                                    chunkX,
+                                                    chunkZ,
                                                     chunkSect.getString("clan"),
-                                                    chunkSect.getInt("beacon.x"),
-                                                    chunkSect.getInt("beacon.y"),
-                                                    chunkSect.getInt("beacon.z")
+                                                    beacon.getX(),
+                                                    beacon.getY(),
+                                                    beacon.getZ()
                                             );
                                             occupiedChunks.add(chunk);
                                             if(!chunkCoords.containsKey(chunkX)) {
                                                 chunkCoords.put(chunkX, new HashMap<Integer, OccupiedChunk>());
                                             }
                                             chunkCoords.get(chunkX).put(chunkZ, chunk);
-                                            chunkCount++;
+                                            
+                                            if(beacon.getType() == Material.BEACON) {                                               
+                                                chunkCount++;
+                                            } else {
+                                                plugin.getLogger().warning("No beacon found at " + beacon.getX() + "/" + beacon.getY() + "/" + beacon.getZ() + " for chunk " + chunkX + " - " + chunkZ + " in region " + regionX + "-" + regionZ + "!");
+                                                plugin.getLogger().info("Removing chunk " + chunkX + " - " + chunkZ + " in region " + regionX + "-" + regionZ + " after loading!");
+                                                noBeacons.add(chunk);
+                                                chunkFailedCount++;
+                                            }
                                         } catch(NumberFormatException e) {
                                             plugin.getLogger().severe("Error while loading chunks of region " + regionX + "-" + regionZ + " from the regions.yml! '" + chunkZStr + "' is not a valid integer!");
                                             chunkFailedCount++;
@@ -165,6 +179,12 @@ public class RegionManager {
         }
         if(chunkFailedCount > 0) {
             plugin.getLogger().warning("Failed to load " + chunkFailedCount + " chunks!");
+        }
+        if(noBeacons.size() > 0) {
+            plugin.getLogger().info("Removing chunks without beacons from the region manager!");
+            for(OccupiedChunk chunk : noBeacons) {
+                unregisterChunk(chunk);
+            }
         }
     }
 
