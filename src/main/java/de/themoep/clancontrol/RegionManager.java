@@ -363,10 +363,12 @@ public class RegionManager {
                 if(oldStatus != region.getStatus()) {
                     if(oldStatus == RegionStatus.FREE) {
                         plugin.getServer().broadcastMessage(plugin.getTag() + " " + ChatColor.GREEN + plugin.getClanDisplay(newController) + ChatColor.GREEN + " hat die Region " + region.getX() + "/" + region.getZ() + " eingenommen!");
-                    } else  {
+                    } else {
                         plugin.getServer().broadcastMessage(plugin.getTag() + ChatColor.GREEN + " Region " + region.getX() + "/" + region.getZ() + " (" + plugin.getClanDisplay(newController) + ChatColor.GREEN + ") " + ChatColor.DARK_GREEN + oldStatus + " -> " + region.getStatus());
                     }
                 }
+            } else if(newController.isEmpty()) {
+                plugin.getServer().broadcastMessage(plugin.getTag() + " " + ChatColor.GREEN + plugin.getClanDisplay(newController) + ChatColor.GREEN + " hat die Region " + region.getX() + "/" + region.getZ() + " aufgegeben!");
             } else {
                 plugin.getServer().broadcastMessage(plugin.getTag() + " " + ChatColor.GREEN + plugin.getClanDisplay(newController) + ChatColor.GREEN + " hat die Region " + region.getX() + "/" + region.getZ() + " von " + plugin.getClanDisplay(oldController) + ChatColor.GREEN + " übernommen!");
             }
