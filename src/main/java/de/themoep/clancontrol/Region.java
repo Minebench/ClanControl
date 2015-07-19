@@ -1,10 +1,9 @@
 package de.themoep.clancontrol;
 
 import de.themoep.utils.ConfigAccessor;
+import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -194,7 +193,7 @@ public class Region {
     public RegionStatus calculateStatus() {
         RegionStatus s;
         if(!getController().isEmpty()) {
-            if(getSurroundingRegions().size() == getSurroundingRegions(RegionStatus.BORDER, getController()).size()) {
+            if(getSurroundingRegions().size() == getSurroundingRegions(getController(), RegionStatus.BORDER, RegionStatus.CENTER).size()) {
                 s = RegionStatus.CENTER;
             } else {
                 s = RegionStatus.BORDER;
@@ -207,7 +206,7 @@ public class Region {
         RegionStatus resulting = setStatus(s);
         if(resulting != null) {
             if(getStatus() == RegionStatus.BORDER || getStatus() == RegionStatus.CENTER) {
-                for (Region r : getSurroundingRegions(RegionStatus.BORDER, getController())) {
+                for(Region r : getSurroundingRegions(getController(), RegionStatus.BORDER)) {
                     r.calculateStatus();
                 }
             } else if(getStatus() == RegionStatus.CONFLICT || getStatus() == RegionStatus.FREE) {
@@ -219,7 +218,7 @@ public class Region {
         return resulting;
     }
 
-    public List<Region> getSurroundingRegions(RegionStatus status, String clan) {
+    public List<Region> getSurroundingRegions(String clan, RegionStatus... status) {
         List<Region> regions = new ArrayList<Region>();
         for(Region r : getSurroundingRegions(status)) {
             if(r.getController().equals(clan)) {
@@ -229,10 +228,10 @@ public class Region {
         return regions;
     }
 
-    public List<Region> getSurroundingRegions(RegionStatus status) {
+    public List<Region> getSurroundingRegions(RegionStatus... status) {
         List<Region> regions = new ArrayList<Region>();
         for(Region r : getSurroundingRegions()) {
-            if(r.getStatus() == status) {
+            if(ArrayUtils.contains(status, r.getStatus())) {
                 regions.add(r);
             }
         }
