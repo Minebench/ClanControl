@@ -179,8 +179,11 @@ public class ClanControl extends JavaPlugin {
                         if(args.length > 1) {
                             Block b = ((Player) sender).getTargetBlock((Set<Material>) null, 7);
                             if(b.getType() == Material.BEACON) {
-                                getRegionManager().registerBeacon(args[1], b.getLocation());
-                                sender.sendMessage("Registered Beacon at for " + getClanDisplay(args[1]) + "!");
+                                if(getRegionManager().registerBeacon(args[1], b.getLocation())) {
+                                    sender.sendMessage("Registered Beacon for " + getClanDisplay(args[1]) + "!");
+                                } else {
+                                    sender.sendMessage("Could not register Beacon for " + getClanDisplay(args[1]) + "!");
+                                }
                             } else {
                                 sender.sendMessage("You have to look at a Beacon block to register it!");
                             }
