@@ -266,6 +266,7 @@ public class Region {
     private void save() {
         String section = worldname + "." + getX() + "." + getZ();
         ConfigAccessor storage = getRegionManager().getStorage();
+        storage.getConfig().set(section, null);
         storage.getConfig().set(section + ".controller", getController());
         storage.getConfig().set(section + ".status", getStatus().toString());
         for(OccupiedChunk chunk : getChunks()) {
