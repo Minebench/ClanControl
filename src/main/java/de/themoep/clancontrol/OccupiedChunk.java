@@ -46,7 +46,7 @@ public class OccupiedChunk {
      * @param clanname The name of the clan that occupies this chunk
      */
     public OccupiedChunk(Location beaconLoc, String clanname) {
-        this(beaconLoc.getWorld().getName(), beaconLoc.getChunk().getX(), beaconLoc.getChunk().getZ(), clanname, (int) beaconLoc.getX(), (int) beaconLoc.getY(), (int) beaconLoc.getZ());
+        this(beaconLoc.getWorld().getName(), beaconLoc.getChunk().getX(), beaconLoc.getChunk().getZ(), clanname.toLowerCase(), (int) beaconLoc.getX(), (int) beaconLoc.getY(), (int) beaconLoc.getZ());
     }
 
     public String getClan() {
