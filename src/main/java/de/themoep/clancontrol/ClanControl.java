@@ -11,20 +11,19 @@ import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Team;
-import org.kitteh.vanish.VanishManager;
 import org.kitteh.vanish.VanishPlugin;
-import org.kitteh.vanish.VanishUser;
-import org.kitteh.vanish.staticaccess.VanishNoPacket;
-import org.kitteh.vanish.staticaccess.VanishNotLoadedException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -174,7 +173,28 @@ public class ClanControl extends JavaPlugin {
                     sender.sendMessage("You don't have the permission clancontrol.command.reload");
                 }
                 return true;
-            }            
+            }  else if(args[0].equalsIgnoreCase("register")) {
+                if(sender instanceof Player) {
+                    if(sender.hasPermission("clancontrol.command.register")) {
+                        if(args.length > 1) {
+                            Block b = ((Player) sender).getTargetBlock((Set<Material>) null, 7);
+                            if(b.getType() == Material.BEACON) {
+                                getRegionManager().registerBeacon(args[1], b.getLocation());
+                                sender.sendMessage("Registered Beacon at for " + getClanDisplay(args[1]) + "!");
+                            } else {
+                                sender.sendMessage("You have to look at a Beacon block to register it!");
+                            }
+                        } else {
+                            sender.sendMessage("Usage: /" + label + " register <clantag>");
+                        }
+                    } else {
+                        sender.sendMessage("You don't have the permission clancontrol.command.register");
+                    }
+                } else {
+                    sender.sendMessage("This command can only be run by a player as you need to look at a beacon!");
+                }
+                return true;
+            }
         }
         return false;        
     }
