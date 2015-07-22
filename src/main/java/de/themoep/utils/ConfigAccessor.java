@@ -76,6 +76,8 @@ public class ConfigAccessor {
             } catch (IOException ex) {
                 plugin.getLogger().log(Level.SEVERE, "Could not save config to " + configFile, ex);
             }
+        } else {
+            plugin.getLogger().log(Level.SEVERE, ((fileConfiguration == null) ? "fileConfiguration is null! " : "") + ((configFile == null) ? "configFile is null!" : ""));
         }
     }
 
