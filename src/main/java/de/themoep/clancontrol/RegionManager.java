@@ -103,48 +103,50 @@ public class RegionManager {
                             int regionZ = Integer.parseInt(zStr);
                             List<OccupiedChunk> occupiedChunks = new ArrayList<OccupiedChunk>();
                             ConfigurationSection chunksSect = worldsSect.getConfigurationSection(xStr + "." + zStr + ".chunks");
-                            for(String chunkXStr : chunksSect.getKeys(false)) {
-                                try {
-                                    int chunkX = Integer.parseInt(chunkXStr);
-                                    for(String chunkZStr : chunksSect.getConfigurationSection(chunkXStr).getKeys(false)) {
-                                        try {
-                                            int chunkZ = Integer.parseInt(chunkZStr);
-                                            
-                                            ConfigurationSection chunkSect = chunksSect.getConfigurationSection(chunkX + "." + chunkZ);
-                                            
-                                            Block beacon = plugin.getServer().getWorld(worldname).getBlockAt(chunkSect.getInt("beacon.x"), chunkSect.getInt("beacon.y"), chunkSect.getInt("beacon.z"));
+                            if(chunksSect != null) {
+                                for(String chunkXStr : chunksSect.getKeys(false)) {
+                                    try {
+                                        int chunkX = Integer.parseInt(chunkXStr);
+                                        for(String chunkZStr : chunksSect.getConfigurationSection(chunkXStr).getKeys(false)) {
+                                            try {
+                                                int chunkZ = Integer.parseInt(chunkZStr);
 
-                                            OccupiedChunk chunk = new OccupiedChunk(
-                                                    worldname,
-                                                    chunkX,
-                                                    chunkZ,
-                                                    chunkSect.getString("clan"),
-                                                    beacon.getX(),
-                                                    beacon.getY(),
-                                                    beacon.getZ()
-                                            );
-                                            occupiedChunks.add(chunk);
-                                            if(!chunkCoords.containsKey(chunkX)) {
-                                                chunkCoords.put(chunkX, new HashMap<Integer, OccupiedChunk>());
-                                            }
-                                            chunkCoords.get(chunkX).put(chunkZ, chunk);
-                                            
-                                            if(beacon.getType() == Material.BEACON) {                                               
-                                                chunkCount++;
-                                            } else {
-                                                plugin.getLogger().warning("No beacon found at " + beacon.getX() + "/" + beacon.getY() + "/" + beacon.getZ() + " for chunk " + chunkX + " - " + chunkZ + " in region " + regionX + "-" + regionZ + "!");
-                                                plugin.getLogger().info("Removing chunk " + chunkX + " - " + chunkZ + " in region " + regionX + "-" + regionZ + " after loading!");
-                                                noBeacons.add(chunk);
+                                                ConfigurationSection chunkSect = chunksSect.getConfigurationSection(chunkX + "." + chunkZ);
+
+                                                Block beacon = plugin.getServer().getWorld(worldname).getBlockAt(chunkSect.getInt("beacon.x"), chunkSect.getInt("beacon.y"), chunkSect.getInt("beacon.z"));
+
+                                                OccupiedChunk chunk = new OccupiedChunk(
+                                                        worldname,
+                                                        chunkX,
+                                                        chunkZ,
+                                                        chunkSect.getString("clan"),
+                                                        beacon.getX(),
+                                                        beacon.getY(),
+                                                        beacon.getZ()
+                                                );
+                                                occupiedChunks.add(chunk);
+                                                if(!chunkCoords.containsKey(chunkX)) {
+                                                    chunkCoords.put(chunkX, new HashMap<Integer, OccupiedChunk>());
+                                                }
+                                                chunkCoords.get(chunkX).put(chunkZ, chunk);
+
+                                                if(beacon.getType() == Material.BEACON) {
+                                                    chunkCount++;
+                                                } else {
+                                                    plugin.getLogger().warning("No beacon found at " + beacon.getX() + "/" + beacon.getY() + "/" + beacon.getZ() + " for chunk " + chunkX + " - " + chunkZ + " in region " + regionX + "-" + regionZ + "!");
+                                                    plugin.getLogger().info("Removing chunk " + chunkX + " - " + chunkZ + " in region " + regionX + "-" + regionZ + " after loading!");
+                                                    noBeacons.add(chunk);
+                                                    chunkFailedCount++;
+                                                }
+                                            } catch(NumberFormatException e) {
+                                                plugin.getLogger().severe("Error while loading chunks of region " + regionX + "-" + regionZ + " from the regions.yml! '" + chunkZStr + "' is not a valid integer!");
                                                 chunkFailedCount++;
                                             }
-                                        } catch(NumberFormatException e) {
-                                            plugin.getLogger().severe("Error while loading chunks of region " + regionX + "-" + regionZ + " from the regions.yml! '" + chunkZStr + "' is not a valid integer!");
-                                            chunkFailedCount++;
                                         }
-                                    }                                    
-                                } catch(NumberFormatException e) {
-                                    plugin.getLogger().severe("Error while loading chunks of region " + regionX + "-" + regionZ + " from the regions.yml! '" + chunkXStr + "' is not a valid integer!");
-                                    chunkFailedCount++;
+                                    } catch(NumberFormatException e) {
+                                        plugin.getLogger().severe("Error while loading chunks of region " + regionX + "-" + regionZ + " from the regions.yml! '" + chunkXStr + "' is not a valid integer!");
+                                        chunkFailedCount++;
+                                    }
                                 }
                             }
                             String statusStr = worldsSect.getString(xStr + "." + zStr + ".status", "FREE");
