@@ -9,14 +9,15 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDamageEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -169,6 +170,46 @@ public class BlockListener implements Listener {
                                 }
                                 break;
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    @EventHandler
+    public void onBlockExplode(EntityExplodeEvent event) {
+        if(!event.isCancelled() && event.getLocation().getWorld().equals(plugin.getRegionManager().getWorld())) {
+            if(plugin.protectBlocks) {
+                Region region = plugin.getRegionManager().getRegion(event.getLocation());
+                if(region != null && region.getStatus() == RegionStatus.CENTER || plugin.getRegionManager().getChunk(event.getLocation()) != null) {
+                    event.setCancelled(true);
+                } else {
+                    for(Block b : event.blockList()) {
+                        Region r = plugin.getRegionManager().getRegion(b.getLocation());
+                        if(region != null && r.getStatus() == RegionStatus.CENTER || plugin.getRegionManager().getChunk(b.getLocation()) != null) {
+                            event.setCancelled(true);
+                            break;
+                        }
+                    }
+                }
+            }
+        }        
+    }
+
+    @EventHandler
+    public void onBlockExplode(BlockExplodeEvent event) {
+        if(!event.isCancelled() && event.getBlock().getLocation().getWorld().equals(plugin.getRegionManager().getWorld())) {
+            if(plugin.protectBlocks) {
+                Region region = plugin.getRegionManager().getRegion(event.getBlock().getLocation());
+                if(region != null && region.getStatus() == RegionStatus.CENTER || plugin.getRegionManager().getChunk(event.getBlock().getLocation()) != null) {
+                    event.setCancelled(true);
+                } else {
+                    for(Block b : event.blockList()) {
+                        Region r = plugin.getRegionManager().getRegion(b.getLocation());
+                        if(region != null && r.getStatus() == RegionStatus.CENTER || plugin.getRegionManager().getChunk(b.getLocation()) != null) {
+                            event.setCancelled(true);
+                            break;
                         }
                     }
                 }
