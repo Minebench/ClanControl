@@ -31,16 +31,19 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
             <version>1.8.7-R0.1-SNAPSHOT</version>
+            <scrope>provided</scrope>
         </dependency>
         <dependency>
             <groupId>net.sacredlabyrinth.phaed</groupId>
             <artifactId>SimpleClans</artifactId>
             <version>2.4.1</version>
+            <scrope>provided</scrope>
         </dependency>
         <dependency>
             <groupId>org.kitteh</groupId>
             <artifactId>VanishNoPacket</artifactId>
             <version>3.19.1</version>
+            <scrope>provided</scrope>
         </dependency>
     </dependencies>
 
